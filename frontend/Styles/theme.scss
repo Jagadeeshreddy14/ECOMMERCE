@@ -1,0 +1,164 @@
+// Color Variables
+:root {
+  --primary: #1976d2;
+  --primary-light: #42a5f5;
+  --primary-dark: #1565c0;
+  --secondary: #9c27b0;
+  --success: #2e7d32;
+  --error: #d32f2f;
+  --warning: #ed6c02;
+  --background: #ffffff;
+  --text-primary: #1a1a1a;
+  --text-secondary: #666666;
+  --border: #e0e0e0;
+  --shadow: rgba(0, 0, 0, 0.1);
+}
+
+// Global Styles
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--background);
+  color: var(--text-primary);
+}
+
+// Animations
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+// Components
+.MuiCard-root {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  animation: fadeIn 0.3s ease-in-out;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px var(--shadow);
+  }
+}
+
+.MuiButton-root {
+  text-transform: none;
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+// Admin Dashboard
+.admin-dashboard {
+  padding: 2rem;
+  
+  @media (max-width: 600px) {
+    padding: 1rem;
+  }
+  
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .stat-card {
+    background: linear-gradient(135deg, var(--primary-light), var(--primary));
+    color: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px var(--shadow);
+    animation: slideIn 0.3s ease-in-out;
+    
+    .stat-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+    }
+  }
+}
+
+// Table Styles
+.MuiTableContainer-root {
+  margin: 1rem 0;
+  box-shadow: 0 4px 12px var(--shadow);
+  border-radius: 10px;
+  overflow: hidden;
+  
+  .MuiTableHead-root {
+    background-color: var(--primary);
+    
+    .MuiTableCell-head {
+      color: white;
+      font-weight: bold;
+    }
+  }
+  
+  .MuiTableBody-root {
+    .MuiTableRow-root {
+      transition: background-color 0.2s ease-in-out;
+      
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+      }
+    }
+  }
+}
+
+// Form Styles
+.MuiDialog-paper {
+  animation: slideIn 0.3s ease-in-out;
+  
+  .MuiDialogTitle-root {
+    background-color: var(--primary);
+    color: white;
+  }
+  
+  .MuiDialogContent-root {
+    padding: 2rem;
+  }
+}
+
+// Responsive Typography
+.MuiTypography-h4 {
+  font-size: 2.5rem;
+  
+  @media (max-width: 600px) {
+    font-size: 2rem;
+  }
+}
+
+.MuiTypography-h6 {
+  font-size: 1.25rem;
+  
+  @media (max-width: 600px) {
+    font-size: 1.1rem;
+  }
+}
+
+// Loading States
+.loading-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

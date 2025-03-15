@@ -1,0 +1,14 @@
+{
+  "welcomeBack": "மீண்டும் வரவேற்கிறோம்",
+  "signIn": "உள்நுழைய",
+  "email": "மின்னஞ்சல்",
+  "password": "கடவுச்சொல்",
+  "forgotPassword": "கடவுச்சொல்லை மறந்துவிட்டீர்களா?",
+  "dontHaveAccount": "கணக்கு இல்லையா?",
+  "createAccount": "கணக்கை உருவாக்கு",
+  "alreadyHaveAccount": "ஏற்கனவே கணக்கு உள்ளதா?",
+  "username": "பயனர்பெயர்",
+  "confirmPassword": "கடவுச்சொல்லை உறுதிப்படுத்தவும்",
+  "mobileNumber": "கைபேசி எண்",
+  "signUp": "பதிவு செய்யவும்"
+}

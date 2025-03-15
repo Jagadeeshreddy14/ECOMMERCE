@@ -1,0 +1,13 @@
+{
+  "welcomeBack": "वापसी पर स्वागत है",
+  "signIn": "साइन इन करें",
+  "email": "ईमेल",
+  "password": "पासवर्ड",
+  "forgotPassword": "पासवर्ड भूल गए?",
+  "createAccount": "खाता बनाएं",
+  "alreadyHaveAccount": "पहले से ही खाता है?",
+  "username": "उपयोगकर्ता नाम",
+  "confirmPassword": "पासवर्ड की पुष्टि करें",
+  "mobileNumber": "मोबाइल नंबर",
+  "signUp": "साइन अप करें"
+}

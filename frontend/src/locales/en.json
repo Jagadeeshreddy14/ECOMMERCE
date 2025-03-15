@@ -1,0 +1,18 @@
+{
+  "welcome": "Welcome to Apex Store",
+  "login": "Login",
+  "signup": "Sign Up",
+  "email": "Email",
+  "password": "Password",
+  "cart": "Cart",
+  "wishlist": "Wishlist",
+  "welcomeBack": "Welcome Back",
+  "signIn": "Sign In",
+  "forgotPassword": "Forgot Password?",
+  "createAccount": "Create Account",
+  "alreadyHaveAccount": "Already have an account?",
+  "username": "Username",
+  "confirmPassword": "Confirm Password",
+  "mobileNumber": "Mobile Number",
+  "signUp": "Sign Up"
+}
