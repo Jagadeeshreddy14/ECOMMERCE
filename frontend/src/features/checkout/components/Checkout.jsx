@@ -12,7 +12,8 @@ import { resetCartByUserIdAsync, selectCartItems } from '../../cart/CartSlice';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { SHIPPING, TAXES } from '../../../constants';
 import { motion } from 'framer-motion';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 import { formatPrice } from '../../../utils/formatPrice';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
@@ -46,6 +47,23 @@ const THEME_COLORS = {
   gradient: {
     primary: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
     success: 'linear-gradient(135deg, #10B981 0%, #059669 100%)'
+  }
+};
+
+// Add custom toast styles
+const toastConfig = {
+  position: "top-right",
+  autoClose: 3000,
+  hideProgressBar: false,
+  closeOnClick: true,
+  pauseOnHover: true,
+  draggable: true,
+  progress: undefined,
+  style: {
+    backgroundColor: THEME_COLORS.cardBg,
+    color: THEME_COLORS.text.primary,
+    borderRadius: '8px',
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
   }
 };
 
@@ -333,6 +351,199 @@ export const OrderSummarySection = ({
   );
 };
 
+// Add this before any component definitions
+const formValidation = {
+  type: { 
+    required: "Address type is required",
+    minLength: { value: 2, message: "Type must be at least 2 characters" }
+  },
+  street: { 
+    required: "Street address is required",
+    minLength: { value: 5, message: "Street address must be at least 5 characters" }
+  },
+  phoneNumber: {
+    required: "Phone number is required",
+    pattern: {
+      value: /^\d{10}$/,
+      message: "Please enter a valid 10-digit phone number"
+    }
+  },
+  country: { 
+    required: "Country is required",
+    minLength: { value: 2, message: "Country must be at least 2 characters" }
+  },
+  city: { 
+    required: "City is required",
+    minLength: { value: 2, message: "City must be at least 2 characters" }
+  },
+  state: { 
+    required: "State is required",
+    minLength: { value: 2, message: "State must be at least 2 characters" }
+  },
+  postalCode: {
+    required: "Postal code is required",
+    pattern: {
+      value: /^\d{6}$/,
+      message: "Please enter a valid 6-digit postal code"
+    }
+  }
+};
+
+const AddressForm = ({ register, errors, handleSubmit, handleAddAddress, reset, addressStatus, formValidation }) => (
+  <Stack 
+    component="form" 
+    noValidate 
+    spacing={3} 
+    onSubmit={handleSubmit(handleAddAddress)}
+    sx={{
+      p: 4,
+      border: '1px solid',
+      borderColor: THEME_COLORS.border,
+      borderRadius: 3,
+      bgcolor: THEME_COLORS.cardBg,
+      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+      transition: 'all 0.3s ease'
+    }}
+  >
+    <Stack direction="row" alignItems="center" spacing={1}>
+      <Typography variant="h6" fontWeight={600} color={THEME_COLORS.text.primary}>
+        Add New Address
+      </Typography>
+    </Stack>
+
+    <Grid container spacing={2.5}>
+      <Grid item xs={12} sm={6}>
+        <TextField
+          fullWidth
+          label="Address Type"
+          placeholder="Home, Office, etc."
+          {...register("type", formValidation.type)}
+          error={!!errors.type}
+          helperText={errors.type?.message}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              borderRadius: 2,
+              '&:hover fieldset': {
+                borderColor: THEME_COLORS.primary,
+              }
+            }
+          }}
+        />
+      </Grid>
+      
+      <Grid item xs={12}>
+        <TextField
+          fullWidth
+          label="Street Address"
+          multiline
+          rows={2}
+          {...register("street", formValidation.street)}
+          error={!!errors.street}
+          helperText={errors.street?.message}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              borderRadius: 2
+            }
+          }}
+        />
+      </Grid>
+
+      <Grid item xs={12} sm={6}>
+        <TextField
+          fullWidth
+          label="Phone Number"
+          type="tel"
+          {...register("phoneNumber", formValidation.phoneNumber)}
+          error={!!errors.phoneNumber}
+          helperText={errors.phoneNumber?.message}
+        />
+      </Grid>
+
+      <Grid item xs={12} sm={6}>
+        <TextField
+          fullWidth
+          label="Country"
+          {...register("country", formValidation.country)}
+          error={!!errors.country}
+          helperText={errors.country?.message}
+        />
+      </Grid>
+
+      <Grid item xs={12} sm={4}>
+        <TextField
+          fullWidth
+          label="City"
+          {...register("city", formValidation.city)}
+          error={!!errors.city}
+          helperText={errors.city?.message}
+        />
+      </Grid>
+
+      <Grid item xs={12} sm={4}>
+        <TextField
+          fullWidth
+          label="State"
+          {...register("state", formValidation.state)}
+          error={!!errors.state}
+          helperText={errors.state?.message}
+        />
+      </Grid>
+
+      <Grid item xs={12} sm={4}>
+        <TextField
+          fullWidth
+          label="Postal Code"
+          type="number"
+          {...register("postalCode", formValidation.postalCode)}
+          error={!!errors.postalCode}
+          helperText={errors.postalCode?.message}
+        />
+      </Grid>
+
+      <Grid item xs={12}>
+        <Stack 
+          direction="row" 
+          spacing={2} 
+          justifyContent="flex-end"
+        >
+          <Button
+            variant="outlined"
+            onClick={() => reset()}
+            sx={{
+              borderRadius: 2,
+              color: THEME_COLORS.text.secondary,
+              borderColor: THEME_COLORS.border,
+              '&:hover': {
+                borderColor: THEME_COLORS.primary,
+                bgcolor: 'rgba(37, 99, 235, 0.04)'
+              }
+            }}
+          >
+            Reset
+          </Button>
+          <LoadingButton
+            loading={addressStatus === 'pending'}
+            type="submit"
+            variant="contained"
+            sx={{
+              borderRadius: 2,
+              bgcolor: THEME_COLORS.primary,
+              '&:hover': {
+                bgcolor: THEME_COLORS.primary,
+                transform: 'translateY(-1px)',
+                boxShadow: '0 4px 8px rgba(37, 99, 235, 0.25)'
+              },
+              transition: 'all 0.2s ease'
+            }}
+          >
+            Save Address
+          </LoadingButton>
+        </Stack>
+      </Grid>
+    </Grid>
+  </Stack>
+);
+
 export const Checkout = () => {
   const status = '';
   const addresses = useSelector(selectAddresses);
@@ -412,20 +623,32 @@ export const Checkout = () => {
   }, [currentOrder]);
 
   const handleAddAddress = async (data) => {
-    if (!loggedInUser?._id) {
-      toast.error('Please login to add address');
-      return;
-    }
-  
-    const addressData = {
-      ...data,
-      user: loggedInUser._id
-    };
-  
     try {
-      await dispatch(addAddressAsync(addressData)).unwrap();
+      if (!loggedInUser?._id) {
+        toast.error('Please login to add address', toastConfig);
+        return;
+      }
+  
+      const addressData = {
+        ...data,
+        user: loggedInUser._id
+      };
+  
+      const result = await dispatch(addAddressAsync(addressData)).unwrap();
+      
+      if (result) {
+        toast.success('Address saved successfully!', {
+          ...toastConfig,
+          icon: '🏠'
+        });
+        setSelectedAddress(result);
+        reset();
+      }
     } catch (error) {
-      toast.error(error.message || 'Failed to save address');
+      toast.error(error.message || 'Failed to save address', {
+        ...toastConfig,
+        icon: '❌'
+      });
     }
   };
 
@@ -541,129 +764,15 @@ export const Checkout = () => {
               </Stack>
 
               {/* address form */}
-              <Stack 
-                component="form" 
-                noValidate 
-                spacing={3} 
-                onSubmit={handleSubmit(handleAddAddress)}
-                sx={{
-                  p: 4,
-                  border: '1px solid',
-                  borderColor: THEME_COLORS.border,
-                  borderRadius: 3,
-                  bgcolor: THEME_COLORS.cardBg,
-                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-                  '&:hover': {
-                    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)'
-                  },
-                  transition: 'all 0.3s ease'
-                }}
-              >
-                <Stack direction="row" alignItems="center" spacing={1}>
-                  <LocationOnIcon color="primary" />
-                  <Typography variant="h6">Add New Address</Typography>
-                </Stack>
-
-                <Grid container spacing={2}>
-  <Grid item xs={12} sm={6}>
-    <StyledTextField
-      icon={<HomeIcon />}
-      label="Address Type"
-      placeholder="Home, Office, etc."
-      {...register("type", formValidation.type)}
-      error={!!errors.type}
-      helperText={errors.type?.message}
-    />
-  </Grid>
-  
-  <Grid item xs={12}>
-    <StyledTextField
-      icon={<LocationOnIcon />}
-      label="Street Address"
-      multiline
-      rows={2}
-      {...register("street", formValidation.street)}
-      error={!!errors.street}
-      helperText={errors.street?.message}
-    />
-  </Grid>
-
-  <Grid item xs={12} sm={6}>
-    <StyledTextField
-      icon={<PhoneIcon />}
-      label="Phone Number"
-      type="tel"
-      {...register("phoneNumber", formValidation.phoneNumber)}
-      error={!!errors.phoneNumber}
-      helperText={errors.phoneNumber?.message}
-    />
-  </Grid>
-
-  <Grid item xs={12} sm={6}>
-    <StyledTextField
-      icon={<PublicIcon />}
-      label="Country"
-      {...register("country", formValidation.country)}
-      error={!!errors.country}
-      helperText={errors.country?.message}
-    />
-  </Grid>
-
-  <Grid item xs={12} sm={4}>
-    <StyledTextField
-      icon={<LocationCityIcon />}
-      label="City"
-      {...register("city", formValidation.city)}
-      error={!!errors.city}
-      helperText={errors.city?.message}
-    />
-  </Grid>
-
-  <Grid item xs={12} sm={4}>
-    <StyledTextField
-      icon={<LocationCityIcon />}
-      label="State"
-      {...register("state", formValidation.state)}
-      error={!!errors.state}
-      helperText={errors.state?.message}
-    />
-  </Grid>
-
-  <Grid item xs={12} sm={4}>
-    <StyledTextField
-      icon={<LocationOnIcon />}
-      label="Postal Code"
-      type="number"
-      {...register("postalCode", formValidation.postalCode)}
-      error={!!errors.postalCode}
-      helperText={errors.postalCode?.message}
-    />
-  </Grid>
-</Grid>
-
-                <Stack 
-                  direction="row" 
-                  spacing={2} 
-                  justifyContent="flex-end"
-                >
-                  <Button
-                    variant="outlined"
-                    color="inherit"
-                    onClick={() => reset()}
-                    startIcon={<ClearIcon />}
-                  >
-                    Reset
-                  </Button>
-                  <LoadingButton
-                    loading={status === 'pending'}
-                    type="submit"
-                    variant="contained"
-                    startIcon={<SaveIcon />}
-                  >
-                    Save Address
-                  </LoadingButton>
-                </Stack>
-              </Stack>
+              <AddressForm 
+                register={register} 
+                errors={errors} 
+                handleSubmit={handleSubmit} 
+                handleAddAddress={handleAddAddress} 
+                reset={reset} 
+                addressStatus={addressStatus} 
+                formValidation={formValidation} // Add this prop
+              />
 
               {/* existing address */}
               <Stack rowGap={3}>
@@ -819,6 +928,7 @@ export const Checkout = () => {
           </Grid>
         </Grid>
       </Container>
+      <ToastContainer />
     </Box>
   );
 };

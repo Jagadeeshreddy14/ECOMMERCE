@@ -1,28 +1,55 @@
 exports.orderConfirmationEmail = (order, user) => `
-  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-    <h2 style="color: #2563EB;">Order Confirmation - Apex Store</h2>
-    <p>Dear ${user.name},</p>
-    <p>Thank you for your order #${order._id}.</p>
-    
-    <div style="background: #F3F4F6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-      <h3>Order Details:</h3>
-      <p>Total Amount: ₹${order.total}</p>
-      <p>Payment Method: ${order.paymentMode}</p>
-      
-      <h3>Items:</h3>
-      ${order.item.map(item => `
-        <div style="border-bottom: 1px solid #E5E7EB; padding: 10px 0;">
-          <p style="margin: 5px 0;">${item.product.title} x ${item.quantity}</p>
-          <p style="margin: 5px 0; color: #6B7280;">Price: ₹${item.product.price}</p>
-        </div>
-      `).join('')}
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: #2563EB; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+      <h2 style="color: white; margin: 0;">Order Confirmation - Apex Store</h2>
     </div>
 
-    <p>Your order will be delivered to:</p>
-    <div style="background: #F3F4F6; padding: 15px; border-radius: 8px;">
-      <p style="margin: 5px 0;">${order.address.street}</p>
-      <p style="margin: 5px 0;">${order.address.city}, ${order.address.state}</p>
-      <p style="margin: 5px 0;">${order.address.country} - ${order.address.postalCode}</p>
+    <p style="color: #111827; font-size: 16px;">Dear ${user.name},</p>
+    <p style="color: #374151;">Thank you for shopping with us! Your order #${order._id} has been confirmed.</p>
+    
+    <div style="background: #F9FAFB; padding: 20px; border-radius: 8px; margin: 20px 0;">
+      <h3 style="color: #1F2937; margin-top: 0;">Order Details</h3>
+      <p style="margin: 5px 0;"><strong>Order Date:</strong> ${new Date(order.createdAt).toLocaleDateString()}</p>
+      <p style="margin: 5px 0;"><strong>Payment Method:</strong> ${order.paymentMode}</p>
+      <p style="margin: 5px 0;"><strong>Order Status:</strong> ${order.status}</p>
+
+      <div style="margin-top: 20px;">
+        <h4 style="color: #4B5563; margin-bottom: 10px;">Items Ordered:</h4>
+        ${order.item.map(item => `
+          <div style="display: flex; border-bottom: 1px solid #E5E7EB; padding: 10px 0;">
+            <img src="${item.product.thumbnail}" alt="${item.product.title}" style="width: 80px; height: 80px; object-fit: cover; margin-right: 15px; border-radius: 4px;">
+            <div>
+              <p style="margin: 0 0 5px 0; color: #1F2937; font-weight: 500;">${item.product.title}</p>
+              <p style="margin: 0 0 5px 0; color: #6B7280;">Quantity: ${item.quantity}</p>
+              <p style="margin: 0; color: #2563EB;">₹${item.product.price}</p>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #E5E7EB;">
+        <h4 style="color: #4B5563; margin-bottom: 10px;">Delivery Address:</h4>
+        <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #E5E7EB;">
+          <p style="margin: 5px 0;">${order.address[0].type || 'N/A'}</p>
+          <p style="margin: 5px 0;">${order.address[0].street || 'N/A'}</p>
+          <p style="margin: 5px 0;">${order.address[0].city || 'N/A'}</p>
+           <p style="margin: 5px 0;">${order.address[0].state || 'N/A'}</p>
+          <p style="margin: 5px 0;">${order.address[0].country || 'N/A'} - ${order.address[0].postalCode || 'N/A'}</p>
+          <p style="margin: 5px 0;">Phone: ${order.address[0].phoneNumber}</p>
+        </div>
+      </div>
+
+      <div style="margin-top: 20px; text-align: right;">
+        <p style="font-size: 18px; color: #1F2937;"><strong>Total Amount:</strong> ₹${order.total}</p>
+      </div>
+    </div>
+
+    <div style="background: #EEF2FF; padding: 15px; border-radius: 8px; margin-top: 20px;">
+      <p style="color: #4338CA; margin: 0;">If you have any questions about your order, please contact our customer support.</p>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #E5E7EB;">
+      <p style="color: #6B7280; margin: 0;">Thank you for shopping with Apex Store!</p>
     </div>
   </div>
 `;
