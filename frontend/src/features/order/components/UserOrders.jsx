@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getOrderByUserIdAsync, resetOrderFetchStatus, selectOrderFetchStatus, selectOrders } from '../OrderSlice';
 import { selectLoggedInUser } from '../../auth/AuthSlice';
-import { Button, IconButton, Paper, Stack, Typography, useMediaQuery, useTheme, Stepper, Step, StepLabel, TextField, Box } from '@mui/material';
+import { Button, IconButton, Paper, Stack, Typography, useMediaQuery, useTheme, Stepper, Step, StepLabel, TextField, Box, FormControl, FormLabel, Select, MenuItem, FormHelperText, RadioGroup, FormControlLabel, Radio, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { Link } from 'react-router-dom';
 import { addToCartAsync, resetCartItemAddStatus, selectCartItemAddStatus, selectCartItems } from '../../cart/CartSlice';
@@ -13,7 +13,160 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { motion } from 'framer-motion';
 import ReplayIcon from '@mui/icons-material/Replay';
 import { useForm } from 'react-hook-form';
-import { createReturnAsync, selectReturnStatus } from '../../returns/ReturnSlice';
+import {  selectReturnStatus, createReturnAsync } from '../../returns/ReturnSlice';
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
+import InfoIcon from '@mui/icons-material/Info';
+
+const ReturnForm = ({ order, onSubmit, onCancel }) => {
+  const { register, handleSubmit, formState: { errors } } = useForm();
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [timeSlot, setTimeSlot] = useState('');
+  const theme = useTheme();
+  const is480 = useMediaQuery(theme.breakpoints.down("480"));
+  
+  const timeSlots = [
+    '9:00 AM - 12:00 PM',
+    '12:00 PM - 3:00 PM',
+    '3:00 PM - 6:00 PM'
+  ];
+
+  return (
+    <Stack component="form" onSubmit={handleSubmit(onSubmit)} spacing={3} sx={{ p: 3 }}>
+      <Typography variant="h6">Return Request</Typography>
+
+      {/* Return Reason */}
+      <FormControl error={Boolean(errors.reason)}>
+        <FormLabel>Reason for Return</FormLabel>
+        <Select
+          {...register('reason', { required: 'Please select a reason' })}
+          defaultValue=""
+        >
+          <MenuItem value="">Select a reason</MenuItem>
+          <MenuItem value="Damaged Product">Damaged Product</MenuItem>
+          <MenuItem value="Wrong Item Received">Wrong Item Received</MenuItem>
+          <MenuItem value="Size/Fit Issue">Size/Fit Issue</MenuItem>
+          <MenuItem value="Quality Issue">Quality Issue</MenuItem>
+          <MenuItem value="Change of Mind">Change of Mind</MenuItem>
+          <MenuItem value="Other">Other</MenuItem>
+        </Select>
+        {errors.reason && (
+          <FormHelperText>{errors.reason.message}</FormHelperText>
+        )}
+      </FormControl>
+
+      {/* Return Mode */}
+      <FormControl>
+        <FormLabel>Return Mode</FormLabel>
+        <RadioGroup
+          defaultValue="Pickup"
+          {...register('returnMode')}
+        >
+          <FormControlLabel 
+            value="Pickup" 
+            control={<Radio />} 
+            label="Pickup from my address" 
+          />
+          <FormControlLabel 
+            value="Self-Shipping" 
+            control={<Radio />} 
+            label="Self-shipping (Coming soon)" 
+            disabled 
+          />
+        </RadioGroup>
+      </FormControl>
+
+      {/* Pickup Schedule */}
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <DatePicker
+          label="Select Pickup Date"
+          value={selectedDate}
+          onChange={(newValue) => setSelectedDate(newValue)}
+          minDate={dayjs().add(1, 'day')}
+          maxDate={dayjs().add(7, 'day')}
+          renderInput={(params) => <TextField {...params} />}
+        />
+      </LocalizationProvider>
+
+      {/* Time Slot */}
+      <FormControl>
+        <FormLabel>Select Time Slot</FormLabel>
+        <Select
+          value={timeSlot}
+          onChange={(e) => setTimeSlot(e.target.value)}
+        >
+          {timeSlots.map((slot) => (
+            <MenuItem key={slot} value={slot}>{slot}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      {/* Images Upload */}
+      <Stack spacing={1}>
+        <Typography variant="subtitle2">
+          Upload Images (Max 3, showing the issue)
+        </Typography>
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          {...register('images', {
+            required: 'Please upload at least one image',
+            validate: (files) => 
+              files?.length <= 3 || 'Maximum 3 images allowed'
+          })}
+        />
+        {errors.images && (
+          <Typography color="error" variant="caption">
+            {errors.images.message}
+          </Typography>
+        )}
+      </Stack>
+
+      {/* Return Policy */}
+      <Paper variant="outlined" sx={{ p: 2 }}>
+        <Typography variant="subtitle2" gutterBottom>
+          Return Policy:
+        </Typography>
+        <List dense>
+          <ListItem>
+            <ListItemIcon>
+              <InfoIcon color="primary" fontSize="small" />
+            </ListItemIcon>
+            <ListItemText primary="Item must be in original condition" />
+          </ListItem>
+          <ListItem>
+            <ListItemIcon>
+              <InfoIcon color="primary" fontSize="small" />
+            </ListItemIcon>
+            <ListItemText primary="Pack with original packaging and accessories" />
+          </ListItem>
+          <ListItem>
+            <ListItemIcon>
+              <InfoIcon color="primary" fontSize="small" />
+            </ListItemIcon>
+            <ListItemText primary="Refund will be processed in 5-7 business days" />
+          </ListItem>
+        </List>
+      </Paper>
+
+      {/* Buttons */}
+      <Stack direction="row" spacing={2} justifyContent="flex-end">
+        <Button variant="outlined" onClick={onCancel}>
+          Cancel
+        </Button>
+        <LoadingButton
+          type="submit"
+          variant="contained"
+          loading={false}
+        >
+          Submit Return Request
+        </LoadingButton>
+      </Stack>
+    </Stack>
+  );
+};
 
 export const UserOrders = () => {
     const dispatch = useDispatch();
@@ -25,6 +178,7 @@ export const UserOrders = () => {
     const returnStatus = useSelector(selectReturnStatus);
     const { register, handleSubmit, formState: { errors } } = useForm();
     const [returnOrderId, setReturnOrderId] = useState(null);
+    const [selectedDate, setSelectedDate] = useState(null);
 
     const theme = useTheme();
     const is1200 = useMediaQuery(theme.breakpoints.down("1200"));
@@ -91,122 +245,76 @@ export const UserOrders = () => {
 
     const handleReturnSubmit = async (data) => {
         try {
-            // Create FormData for image upload
-            const formData = new FormData();
-            formData.append('orderId', returnOrderId);
-            formData.append('reason', data.reason);
-            formData.append('userId', loggedInUser._id);
-
-            // Validate and append images
-            const files = data.returnImages;
-            if (files && files.length > 0) {
-                if (files.length > 3) {
-                    toast.error('Maximum 3 images allowed');
-                    return;
-                }
-
-                // Check file types and sizes
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    if (!file.type.startsWith('image/')) {
-                        toast.error('Only image files are allowed');
-                        return;
-                    }
-                    if (file.size > 5 * 1024 * 1024) { // 5MB limit
-                        toast.error('Image size should be less than 5MB');
-                        return;
-                    }
-                    formData.append('images', file);
-                }
-            }
-
-            // Submit return request
-            await dispatch(createReturnAsync(formData));
-
-            if (returnStatus === 'fulfilled') {
-                toast.success('Return request submitted successfully');
-                setReturnOrderId(null);
-
-                // Refresh orders list
-                dispatch(getOrderByUserIdAsync(loggedInUser._id));
-            }
+            const returnData = {
+                orderId: returnOrderId,
+                reason: data.reason,
+                returnMode: data.returnMode || 'Pickup',
+                pickupDate: selectedDate?.toISOString(),
+                timeSlot: data.timeSlot,
+                // Add any other required fields from the form
+            };
+        
+            await dispatch(createReturnAsync(returnData)).unwrap();
+            toast.success('Return request submitted successfully');
+            setReturnOrderId(null); // Close the return form
         } catch (error) {
             toast.error(error.message || 'Failed to submit return request');
         }
     };
 
     const renderReturnForm = () => (
-        <Stack
-            component="form"
-            onSubmit={handleSubmit(handleReturnSubmit)}
-            spacing={2}
-            sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 1 }}
-        >
-            <Typography variant="h6">Return Request Form</Typography>
+        <Stack component="form" onSubmit={handleSubmit(handleReturnSubmit)} spacing={2}>
+            <Typography variant="h6">Return Request</Typography>
 
-            <TextField
-                label="Reason for Return"
-                {...register("reason", {
-                    required: "Reason is required",
-                    minLength: {
-                        value: 20,
-                        message: "Please provide a detailed reason (minimum 20 characters)"
-                    }
-                })}
-                multiline
-                rows={4}
-                error={Boolean(errors.reason)}
-                helperText={errors.reason?.message}
-            />
-
-            <Stack spacing={1}>
-                <Typography variant="body2" color="text.secondary">
-                    Upload Images (Max 3 images, 5MB each)
-                </Typography>
-                <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    {...register("returnImages", {
-                        required: "Please upload at least one image",
-                        validate: files =>
-                            !files || files.length <= 3 || "Maximum 3 images allowed"
-                    })}
-                />
-                {errors.returnImages && (
-                    <Typography color="error" variant="caption">
-                        {errors.returnImages.message}
-                    </Typography>
+            <FormControl error={Boolean(errors.reason)}>
+                <FormLabel>Reason for Return</FormLabel>
+                <Select
+                    {...register('reason', { required: 'Please select a reason' })}
+                    defaultValue=""
+                >
+                    <MenuItem value="">Select a reason</MenuItem>
+                    <MenuItem value="Damaged Product">Damaged Product</MenuItem>
+                    <MenuItem value="Wrong Item">Wrong Item</MenuItem>
+                    <MenuItem value="Quality Issue">Quality Issue</MenuItem>
+                    <MenuItem value="Other">Other</MenuItem>
+                </Select>
+                {errors.reason && (
+                    <FormHelperText>{errors.reason.message}</FormHelperText>
                 )}
-            </Stack>
+            </FormControl>
 
-            <Box sx={{ mt: 2 }}>
-                <Typography variant="body2" color="text.secondary">
-                    Return Guidelines:
-                </Typography>
-                <ul>
-                    <li>Product must be in original condition</li>
-                    <li>Include all original packaging and accessories</li>
-                    <li>Attach clear images showing the issue</li>
-                    <li>Returns are processed within 3-5 business days</li>
-                </ul>
-            </Box>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                    label="Select Pickup Date"
+                    value={selectedDate}
+                    onChange={(newValue) => setSelectedDate(newValue)}
+                    minDate={dayjs().add(1, 'day')}
+                    maxDate={dayjs().add(7, 'day')}
+                />
+            </LocalizationProvider>
 
-            <Stack direction="row" spacing={2} justifyContent="flex-end">
-                <Button
-                    variant="outlined"
-                    onClick={() => setReturnOrderId(null)}
+            <FormControl>
+                <FormLabel>Select Time Slot</FormLabel>
+                <Select
+                    {...register('timeSlot', { required: 'Please select a time slot' })}
+                    defaultValue=""
                 >
-                    Cancel
-                </Button>
-                <LoadingButton
-                    type="submit"
-                    variant="contained"
-                    loading={returnStatus === 'loading'}
-                >
-                    Submit Return Request
-                </LoadingButton>
-            </Stack>
+                    <MenuItem value="9:00 AM - 12:00 PM">9:00 AM - 12:00 PM</MenuItem>
+                    <MenuItem value="12:00 PM - 3:00 PM">12:00 PM - 3:00 PM</MenuItem>
+                    <MenuItem value="3:00 PM - 6:00 PM">3:00 PM - 6:00 PM</MenuItem>
+                </Select>
+                {errors.timeSlot && (
+                    <FormHelperText>{errors.timeSlot.message}</FormHelperText>
+                )}
+            </FormControl>
+
+            <LoadingButton
+                type="submit"
+                variant="contained"
+                loading={returnStatus === 'loading'}
+            >
+                Submit Return Request
+            </LoadingButton>
         </Stack>
     );
 
@@ -403,7 +511,7 @@ export const UserOrders = () => {
                                             </Button>
                                         )}
                                     </Stack>
-                                    {returnOrderId === order._id && renderReturnForm()}
+                                    {returnOrderId === order._id && <ReturnForm order={order} onSubmit={handleReturnSubmit} onCancel={() => setReturnOrderId(null)} />}
                                 </Stack>
                             );
                         })}
