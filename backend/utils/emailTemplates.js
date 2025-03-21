@@ -17,7 +17,10 @@ exports.orderConfirmationEmail = (order, user) => `
         <h4 style="color: #4B5563; margin-bottom: 10px;">Items Ordered:</h4>
         ${order.item.map(item => `
           <div style="display: flex; border-bottom: 1px solid #E5E7EB; padding: 10px 0;">
-            <img src="${item.product.thumbnail}" alt="${item.product.title}" style="width: 80px; height: 80px; object-fit: cover; margin-right: 15px; border-radius: 4px;">
+            <img src="${item.product.thumbnail || 'https://via.placeholder.com/80x80?text=No+Image'}" 
+                 alt="${item.product.title}" 
+                 style="width: 80px; height: 80px; object-fit: cover; margin-right: 15px; border-radius: 4px;"
+                 onerror="this.onerror=null; this.src='https://via.placeholder.com/80x80?text=No+Image'">
             <div>
               <p style="margin: 0 0 5px 0; color: #1F2937; font-weight: 500;">${item.product.title}</p>
               <p style="margin: 0 0 5px 0; color: #6B7280;">Quantity: ${item.quantity}</p>
@@ -33,19 +36,22 @@ exports.orderConfirmationEmail = (order, user) => `
           <p style="margin: 5px 0;">${order.address[0].type || 'N/A'}</p>
           <p style="margin: 5px 0;">${order.address[0].street || 'N/A'}</p>
           <p style="margin: 5px 0;">${order.address[0].city || 'N/A'}</p>
-           <p style="margin: 5px 0;">${order.address[0].state || 'N/A'}</p>
+          <p style="margin: 5px 0;">${order.address[0].state || 'N/A'}</p>
           <p style="margin: 5px 0;">${order.address[0].country || 'N/A'} - ${order.address[0].postalCode || 'N/A'}</p>
           <p style="margin: 5px 0;">Phone: ${order.address[0].phoneNumber}</p>
         </div>
       </div>
 
-      <div style="margin-top: 20px; text-align: right;">
-        <p style="font-size: 18px; color: #1F2937;"><strong>Total Amount:</strong> ₹${order.total}</p>
+      <div style="margin-top: 20px; text-align: center; background: #EEF2FF; padding: 15px; border-radius: 8px;">
+        <p style="font-size: 20px; color: #1F2937; margin: 0;">
+          <strong>Total Amount:</strong> 
+          <span style="color: #2563EB;">₹${order.total}</span>
+        </p>
       </div>
     </div>
 
     <div style="background: #EEF2FF; padding: 15px; border-radius: 8px; margin-top: 20px;">
-      <p style="color: #4338CA; margin: 0;">If you have any questions about your order, please contact our customer support.</p>
+      <p style="color: #4338CA; margin: 0;">If you have any questions about your order, please contact our customer support:-+918074563501.</p>
     </div>
 
     <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #E5E7EB;">
