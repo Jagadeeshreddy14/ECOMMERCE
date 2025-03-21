@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getOrderByUserIdAsync, resetOrderFetchStatus, selectOrderFetchStatus, selectOrders } from '../OrderSlice';
 import { selectLoggedInUser } from '../../auth/AuthSlice';
-import { Button, IconButton, Paper, Stack, Typography, useMediaQuery, useTheme, Stepper, Step, StepLabel, TextField } from '@mui/material';
+import { Button, IconButton, Paper, Stack, Typography, useMediaQuery, useTheme, Stepper, Step, StepLabel, TextField, Box } from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
 import { Link } from 'react-router-dom';
 import { addToCartAsync, resetCartItemAddStatus, selectCartItemAddStatus, selectCartItems } from '../../cart/CartSlice';
 import Lottie from 'lottie-react';
@@ -72,110 +73,157 @@ export const UserOrders = () => {
         }
     };
 
-    const handleReturn = (orderId) => {
-        setReturnOrderId(orderId);
+    const handleReturn = async (order) => {
+        // Validate return eligibility
+        if (!isWithinReturnWindow(order.createdAt)) {
+            toast.error('Return window has expired (7 days)');
+            return;
+        }
+
+        if (order.status !== 'Delivered') {
+            toast.error('Only delivered orders can be returned');
+            return;
+        }
+
+        // Show return form
+        setReturnOrderId(order._id);
     };
 
     const handleReturnSubmit = async (data) => {
-        const formData = new FormData();
-        formData.append('orderId', returnOrderId);
-        formData.append('reason', data.reason);
-        formData.append('userId', loggedInUser._id);
-        
-        // Append each image file
-        if (data.returnImages) {
-          for (let i = 0; i < data.returnImages.length; i++) {
-            formData.append('images', data.returnImages[i]);
-          }
-        }
-    
-        await dispatch(createReturnAsync(formData));
-        
-        if (returnStatus === 'fulfilled') {
-          toast.success('Return request submitted successfully');
-          setReturnOrderId(null);
-        } else if (returnStatus === 'failed') {
-          toast.error('Failed to submit return request');
+        try {
+            // Create FormData for image upload
+            const formData = new FormData();
+            formData.append('orderId', returnOrderId);
+            formData.append('reason', data.reason);
+            formData.append('userId', loggedInUser._id);
+
+            // Validate and append images
+            const files = data.returnImages;
+            if (files && files.length > 0) {
+                if (files.length > 3) {
+                    toast.error('Maximum 3 images allowed');
+                    return;
+                }
+
+                // Check file types and sizes
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    if (!file.type.startsWith('image/')) {
+                        toast.error('Only image files are allowed');
+                        return;
+                    }
+                    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                        toast.error('Image size should be less than 5MB');
+                        return;
+                    }
+                    formData.append('images', file);
+                }
+            }
+
+            // Submit return request
+            await dispatch(createReturnAsync(formData));
+
+            if (returnStatus === 'fulfilled') {
+                toast.success('Return request submitted successfully');
+                setReturnOrderId(null);
+
+                // Refresh orders list
+                dispatch(getOrderByUserIdAsync(loggedInUser._id));
+            }
+        } catch (error) {
+            toast.error(error.message || 'Failed to submit return request');
         }
     };
 
     const renderReturnForm = () => (
-        <Stack 
-            component="form" 
-            onSubmit={handleSubmit(handleReturnSubmit)} 
-            spacing={2} 
+        <Stack
+            component="form"
+            onSubmit={handleSubmit(handleReturnSubmit)}
+            spacing={2}
             sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 1 }}
         >
             <Typography variant="h6">Return Request Form</Typography>
-            
+
             <TextField
-              label="Reason for Return"
-              {...register("reason", { 
-                required: "Reason is required",
-                minLength: {
-                  value: 20,
-                  message: "Please provide a detailed reason (minimum 20 characters)"
-                }
-              })}
-              multiline
-              rows={4}
-              error={Boolean(errors.reason)}
-              helperText={errors.reason?.message}
-            />
-    
-            <Stack spacing={1}>
-              <Typography variant="body2" color="text.secondary">
-                Upload Images (Max 3 images)
-              </Typography>
-              <input
-                type="file"
-                accept="image/*"
-                {...register("returnImages", { 
-                  required: "Please upload at least one image",
-                  validate: (files) => 
-                    files.length <= 3 || "Maximum 3 images allowed"
+                label="Reason for Return"
+                {...register("reason", {
+                    required: "Reason is required",
+                    minLength: {
+                        value: 20,
+                        message: "Please provide a detailed reason (minimum 20 characters)"
+                    }
                 })}
-                multiple
-              />
-              {errors.returnImages && (
-                <Typography color="error" variant="caption">
-                  {errors.returnImages.message}
+                multiline
+                rows={4}
+                error={Boolean(errors.reason)}
+                helperText={errors.reason?.message}
+            />
+
+            <Stack spacing={1}>
+                <Typography variant="body2" color="text.secondary">
+                    Upload Images (Max 3 images, 5MB each)
                 </Typography>
-              )}
+                <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    {...register("returnImages", {
+                        required: "Please upload at least one image",
+                        validate: files =>
+                            !files || files.length <= 3 || "Maximum 3 images allowed"
+                    })}
+                />
+                {errors.returnImages && (
+                    <Typography color="error" variant="caption">
+                        {errors.returnImages.message}
+                    </Typography>
+                )}
             </Stack>
-    
+
+            <Box sx={{ mt: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                    Return Guidelines:
+                </Typography>
+                <ul>
+                    <li>Product must be in original condition</li>
+                    <li>Include all original packaging and accessories</li>
+                    <li>Attach clear images showing the issue</li>
+                    <li>Returns are processed within 3-5 business days</li>
+                </ul>
+            </Box>
+
             <Stack direction="row" spacing={2} justifyContent="flex-end">
-              <Button 
-                variant="outlined" 
-                onClick={() => setReturnOrderId(null)}
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                variant="contained"
-                disabled={returnStatus === 'loading'}
-              >
-                Submit Return Request
-              </Button>
+                <Button
+                    variant="outlined"
+                    onClick={() => setReturnOrderId(null)}
+                >
+                    Cancel
+                </Button>
+                <LoadingButton
+                    type="submit"
+                    variant="contained"
+                    loading={returnStatus === 'loading'}
+                >
+                    Submit Return Request
+                </LoadingButton>
             </Stack>
         </Stack>
     );
 
     const getStepNumber = (status) => {
         switch (status) {
-          case 'Pending':
-            return 0;
-          case 'Dispatched':
-            return 1;
-          case 'Out for delivery':
-            return 2;
-          case 'Delivered':
-            return 3;
-          case 'Cancelled':
-            return -1;
-          default:
-            return 0;
+            case 'Pending':
+                return 0;
+            case 'Dispatched':
+                return 1;
+            case 'Out for delivery':
+                return 2;
+            case 'Delivered':
+                return 3;
+            case 'Cancelled':
+                return -1;
+            default:
+                return 0;
         }
     };
 
@@ -196,17 +244,17 @@ export const UserOrders = () => {
         if (!product) return null;
 
         return (
-            <Stack 
-                key={product._id || index} 
-                mt={2} 
-                flexDirection={'row'} 
-                rowGap={is768 ? '2rem' : ''} 
-                columnGap={4} 
+            <Stack
+                key={product._id || index}
+                mt={2}
+                flexDirection={'row'}
+                rowGap={is768 ? '2rem' : ''}
+                columnGap={4}
                 flexWrap={is768 ? "wrap" : "nowrap"}
             >
                 <Stack>
                     {product.images && product.images.length > 0 && (
-                        <img 
+                        <img
                             style={{
                                 width: "100%",
                                 aspectRatio: is480 ? 3 / 2 : 1 / 1,
@@ -240,7 +288,7 @@ export const UserOrders = () => {
                         </Typography>
                     )}
                     <Stack mt={2} alignSelf={is480 ? "flex-start" : 'flex-end'} flexDirection={'row'} columnGap={2}>
-                        <Button 
+                        <Button
                             size='small'
                             component={Link}
                             to={`/product-details/${product._id}`}
@@ -253,7 +301,7 @@ export const UserOrders = () => {
                                 Already in Cart
                             </Button>
                         ) : (
-                            <Button 
+                            <Button
                                 size='small'
                                 variant='contained'
                                 onClick={() => handleAddToCart(product)}
@@ -322,9 +370,9 @@ export const UserOrders = () => {
                                         {order.item.map((item, index) => renderOrderItem(item, index))}
                                     </Stack>
                                     <Stack sx={{ width: '100%', mb: 2 }}>
-                                        <Stepper 
-                                            alternativeLabel={!is480} 
-                                            activeStep={getStepNumber(order.status)} 
+                                        <Stepper
+                                            alternativeLabel={!is480}
+                                            activeStep={getStepNumber(order.status)}
                                             orientation={is480 ? "vertical" : "horizontal"}
                                         >
                                             <Step>
@@ -344,12 +392,12 @@ export const UserOrders = () => {
                                     <Stack mt={2} flexDirection={'row'} justifyContent={'space-between'} alignItems={'center'}>
                                         <Typography mb={2}>Status: {order.status}</Typography>
                                         {order.status === 'Delivered' && isWithinReturnWindow(order.createdAt) && (
-                                            <Button 
-                                                variant="outlined" 
-                                                color="secondary" 
+                                            <Button
+                                                variant="outlined"
+                                                color="secondary"
                                                 startIcon={<ReplayIcon />}
                                                 size="small"
-                                                onClick={() => handleReturn(order._id)}
+                                                onClick={() => handleReturn(order)}
                                             >
                                                 Return Order
                                             </Button>
