@@ -61,23 +61,152 @@ exports.orderConfirmationEmail = (order, user) => `
 `;
 
 exports.orderStatusEmail = (order, user) => `
-  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-    <h2 style="color: #2563EB;">Order Status Update</h2>
-    <p>Dear ${user.name},</p>
-    
-    <div style="background: #F3F4F6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-      <p>Your order #${order._id} has been ${order.status.toLowerCase()}.</p>
-      ${order.status === 'Delivered' ? `
-        <p style="color: #059669;">Your order has been successfully delivered!</p>
-        <p>If you have any issues with your order, you can request a return within 7 days.</p>
-      ` : `
-        <p>We'll keep you updated on any further changes to your order status.</p>
-      `}
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: #2563EB; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+      <h2 style="color: white; margin: 0;">Order Status Update - Apex Store</h2>
     </div>
 
-    <p style="color: #6B7280;">Thank you for shopping with Apex Store!</p>
+    <p style="color: #111827; font-size: 16px;">Dear ${user.name},</p>
+    <p style="color: #374151;">We're writing to update you about your order #${order._id}.</p>
+    
+    <div style="background: #F9FAFB; padding: 20px; border-radius: 8px; margin: 20px 0;">
+      <div style="background: ${
+        order.status === 'Delivered' ? '#059669' :
+        order.status === 'Shipped' ? '#2563EB' :
+        order.status === 'Processing' ? '#D97706' : '#6B7280'
+      }; color: white; padding: 15px; border-radius: 8px; text-align: center;">
+        <h3 style="margin: 0;">Order Status: ${order.status}</h3>
+      </div>
+
+      ${getStatusSpecificMessage(order.status)}
+
+      <div style="margin-top: 20px;">
+        <h4 style="color: #4B5563; margin-bottom: 10px;">Order Summary:</h4>
+        ${order.item.map(item => `
+          <div style="display: flex; border-bottom: 1px solid #E5E7EB; padding: 10px 0;">
+            <img src="${item.product.thumbnail || 'https://via.placeholder.com/80x80?text=No+Image'}" 
+                 alt="${item.product.title}" 
+                 style="width: 80px; height: 80px; object-fit: cover; margin-right: 15px; border-radius: 4px;"
+                 onerror="this.onerror=null; this.src='https://via.placeholder.com/80x80?text=No+Image'">
+            <div>
+              <p style="margin: 0 0 5px 0; color: #1F2937; font-weight: 500;">${item.product.title}</p>
+              <p style="margin: 0 0 5px 0; color: #6B7280;">Quantity: ${item.quantity}</p>
+              <p style="margin: 0; color: #2563EB;">₹${item.product.price}</p>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div style="margin-top: 20px; text-align: center; background: #EEF2FF; padding: 15px; border-radius: 8px;">
+        <p style="font-size: 20px; color: #1F2937; margin: 0;">
+          <strong>Total Amount:</strong> 
+          <span style="color: #2563EB;">₹${order.total}</span>
+        </p>
+      </div>
+    </div>
+
+    <div style="background: #EEF2FF; padding: 15px; border-radius: 8px; margin-top: 20px;">
+      <p style="color: #4338CA; margin: 0;">Need help? Contact our customer support at +918074563501</p>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #E5E7EB;">
+      <p style="color: #6B7280; margin: 0;">Thank you for shopping with Apex Store!</p>
+    </div>
   </div>
 `;
+
+// Helper function for status-specific messages
+function getStatusSpecificMessage(status) {
+  const statuses = ['Pending', 'Processing', 'Shipped', 'Delivered'];
+  const currentIndex = statuses.indexOf(status);
+
+  const getStatusIcon = (step) => {
+    const icons = {
+      'Pending': '🛒',
+      'Processing': '⚙️',
+      'Shipped': '🚚',
+      'Delivered': '📦'
+    };
+    return icons[step] || '•';
+  };
+
+  return `
+    <div style="margin: 30px 0;">
+      <div style="display: flex; justify-content: space-between; position: relative; max-width: 100%;">
+        ${statuses.map((step, index) => `
+          <div style="
+            flex: 1;
+            text-align: center;
+            position: relative;
+            ${index <= currentIndex ? 'color: #2563EB;' : 'color: #9CA3AF;'}
+          ">
+            <div style="
+              width: 40px;
+              height: 40px;
+              line-height: 40px;
+              border-radius: 50%;
+              background-color: ${index <= currentIndex ? '#2563EB' : '#E5E7EB'};
+              color: white;
+              margin: 0 auto 10px;
+              position: relative;
+              z-index: 2;
+              font-size: 18px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            ">
+              ${getStatusIcon(step)}
+            </div>
+            <div style="font-size: 14px; font-weight: 500; margin-bottom: 5px;">
+              ${step}
+            </div>
+            ${getStatusMessage(step, index <= currentIndex)}
+          </div>
+          ${index < statuses.length - 1 ? `
+            <div style="
+              position: absolute;
+              left: ${((index + 1) * 25) - 12.5}%;
+              right: ${((statuses.length - index - 2) * 25) + 12.5}%;
+              top: 20px;
+              height: 3px;
+              background: ${index < currentIndex ? '#2563EB' : '#E5E7EB'};
+              transition: all 0.3s ease;
+            "></div>
+          ` : ''}
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function getStatusMessage(status, isActive) {
+  const messages = {
+    'Pending': 'Order placed successfully',
+    'Processing': 'Order is being prepared',
+    'Shipped': 'Out for delivery',
+    'Delivered': 'Package received'
+  };
+
+  const dates = {
+    'Pending': new Date(),
+    'Processing': new Date(Date.now() + 24 * 60 * 60 * 1000),
+    'Shipped': new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+    'Delivered': new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)
+  };
+
+  return `
+    <div style="
+      font-size: 12px;
+      margin-top: 5px;
+      color: ${isActive ? '#4B5563' : '#9CA3AF'};
+    ">
+      <div>${messages[status]}</div>
+      <div style="margin-top: 3px; font-size: 11px;">
+        ${isActive ? dates[status].toLocaleDateString() : ''}
+      </div>
+    </div>
+  `;
+}
 
 exports.returnOrderEmail = (order, user, returnDetails) => `
   <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
