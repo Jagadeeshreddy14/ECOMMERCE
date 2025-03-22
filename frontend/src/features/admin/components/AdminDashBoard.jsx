@@ -37,6 +37,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { SalesDashboard } from './SalesDashboard';
 
 // Configure axios base URL
 axios.defaults.baseURL = 'https://apex-store-backend.onrender.com';
@@ -133,6 +134,7 @@ export const AdminDashBoard = () => {
       endDate: '',
     });
     const [coupons, setCoupons] = useState([]);
+    const [activeTab, setActiveTab] = useState(0);
 
     const handleOpenBrandDialog = () => setOpenBrandDialog(true);
     const handleCloseBrandDialog = () => setOpenBrandDialog(false);
@@ -261,206 +263,229 @@ export const AdminDashBoard = () => {
         dispatch(toggleFilters())
     }
 
+    const handleTabChange = (event, newValue) => {
+      setActiveTab(newValue);
+    };
+
     return (
         <>
-            <motion.div 
-                style={{
-                    position:"fixed",
-                    backgroundColor:"white",
-                    height:"100vh",
-                    padding:'1rem',
-                    overflowY:"scroll",
-                    width:is500?"100vw":"30rem",
-                    zIndex:500
-                }}  
-                variants={{
-                    show:{left:0},
-                    hide:{left:-500}
-                }} 
-                initial={'hide'} 
-                transition={{
-                    ease:"easeInOut",
-                    duration:.7,
-                    type:"spring"
-                }} 
-                animate={isProductFilterOpen===true?"show":"hide"}
-            >
-                {/* filters section */}
-                <Stack mb={'5rem'} sx={{scrollBehavior:"smooth",overflowY:"scroll"}}>
-                    <Typography variant='h4'>New Arrivals</Typography>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+                <Tabs value={activeTab} onChange={handleTabChange}>
+                    <Tab label="Products" />
+                    <Tab label="Sales Dashboard" />
+                    <Tab label="Coupons" />
+                </Tabs>
+            </Box>
 
-                    <IconButton onClick={handleFilterClose} style={{position:"absolute",top:15,right:15}}>
-                        <motion.div whileHover={{scale:1.1}} whileTap={{scale:0.9}}>
-                            <ClearIcon fontSize='medium'/>
-                        </motion.div>
-                    </IconButton>
+            {activeTab === 0 && (
+                <motion.div>
+                    <motion.div 
+                        style={{
+                            position:"fixed",
+                            backgroundColor:"white",
+                            height:"100vh",
+                            padding:'1rem',
+                            overflowY:"scroll",
+                            width:is500?"100vw":"30rem",
+                            zIndex:500
+                        }}  
+                        variants={{
+                            show:{left:0},
+                            hide:{left:-500}
+                        }} 
+                        initial={'hide'} 
+                        transition={{
+                            ease:"easeInOut",
+                            duration:.7,
+                            type:"spring"
+                        }} 
+                        animate={isProductFilterOpen===true?"show":"hide"}
+                    >
+                        {/* filters section */}
+                        <Stack mb={'5rem'} sx={{scrollBehavior:"smooth",overflowY:"scroll"}}>
+                            <Typography variant='h4'>New Arrivals</Typography>
 
-                    <Stack rowGap={2} mt={4} >
-                        
-                        <Typography sx={{cursor:"pointer"}} variant='body2'>Home-decorations</Typography>
-                        <Typography sx={{cursor:"pointer"}} variant='body2'>Women-Jewellery</Typography>
-                        <Typography sx={{cursor:"pointer"}} variant='body2'>WOmen-Bags</Typography>
-                        <Typography sx={{cursor:"pointer"}} variant='body2'>Wallets</Typography>
-                    </Stack>
+                            <IconButton onClick={handleFilterClose} style={{position:"absolute",top:15,right:15}}>
+                                <motion.div whileHover={{scale:1.1}} whileTap={{scale:0.9}}>
+                                    <ClearIcon fontSize='medium'/>
+                                </motion.div>
+                            </IconButton>
 
-                    {/* brand filters */}
-                    <Stack mt={2}>
-                        <Accordion>
-                            <AccordionSummary expandIcon={<AddIcon />}>
-                                <Stack direction="row" justifyContent="space-between" width="100%" alignItems="center">
-                                    <Typography>Brands</Typography>
-                                    <Button 
-                                        size="small" 
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleOpenBrandDialog();
-                                        }}
-                                    >
-                                        Add Brand
-                                    </Button>
-                                </Stack>
-                            </AccordionSummary>
-
-                            <AccordionDetails sx={{p:0}}>
-                                <FormGroup onChange={handleBrandFilters}>
-                                    {brands?.map((brand)=>(
-                                        <motion.div style={{width:"fit-content"}} whileHover={{x:5}} whileTap={{scale:0.9}}>
-                                            <FormControlLabel 
-                                                sx={{ml:1}} 
-                                                control={<Checkbox whileHover={{scale:1.1}} />} 
-                                                label={brand.name} 
-                                                value={brand._id} 
-                                            />
-                                        </motion.div>
-                                    ))}
-                                </FormGroup>
-                            </AccordionDetails>
-                        </Accordion>
-                    </Stack>
-
-                    {/* category filters */}
-                    <Stack mt={2}>
-                        <Accordion>
-                            <AccordionSummary expandIcon={<AddIcon />} aria-controls="brand-filters" id="brand-filters">
-                                <Typography>Category</Typography>
-                            </AccordionSummary>
-
-                            <AccordionDetails sx={{p:0}}>
-                                <FormGroup onChange={handleCategoryFilters}>
-                                    {categories?.map((category)=>(
-                                        <motion.div style={{width:"fit-content"}} whileHover={{x:5}} whileTap={{scale:0.9}}>
-                                            <FormControlLabel 
-                                                sx={{ml:1}} 
-                                                control={<Checkbox whileHover={{scale:1.1}} />} 
-                                                label={category.name} 
-                                                value={category._id} 
-                                            />
-                                        </motion.div>
-                                    ))}
-                                </FormGroup>
-                            </AccordionDetails>
-                        </Accordion>
-                    </Stack>
-                </Stack>
-            </motion.div>
-
-            <Stack rowGap={5} mt={is600?2:5} mb={'3rem'}>
-                {/* sort options */}
-                <Stack flexDirection={'row'} mr={'2rem'} justifyContent={'flex-end'} alignItems={'center'} columnGap={5}>
-                    <Stack alignSelf={'flex-end'} width={'12rem'}>
-                        <FormControl fullWidth>
-                            <InputLabel id="sort-dropdown">Sort</InputLabel>
-                            <Select
-                                variant='standard'
-                                labelId="sort-dropdown"
-                                label="Sort"
-                                onChange={(e)=>setSort(e.target.value)}
-                                value={sort}
-                            >
-                                <MenuItem bgcolor='text.secondary' value={null}>Reset</MenuItem>
-                                {sortOptions.map((option)=>(
-                                    <MenuItem key={option} value={option}>{option.name}</MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                    </Stack>
-                </Stack>
-     
-                <Grid gap={2} container flex={1} justifyContent={'center'} alignContent={"center"}>
-                    {products.map((product)=>(
-                        <Stack key={product._id}>
-                            <Stack sx={{opacity:product.isDeleted?.7:1}}>
-                                <ProductCard 
-                                    id={product._id}
-                                    title={product.title}
-                                    thumbnail={product.thumbnail}
-                                    images={product.images}
-                                    brand={product.brand?.name}
-                                    price={parseFloat(product.price)}
-                                    stockQuantity={product.stockQuantity}
-                                    isAdminCard={true}
-                                />
+                            <Stack rowGap={2} mt={4} >
+                                
+                                <Typography sx={{cursor:"pointer"}} variant='body2'>Home-decorations</Typography>
+                                <Typography sx={{cursor:"pointer"}} variant='body2'>Women-Jewellery</Typography>
+                                <Typography sx={{cursor:"pointer"}} variant='body2'>WOmen-Bags</Typography>
+                                <Typography sx={{cursor:"pointer"}} variant='body2'>Wallets</Typography>
                             </Stack>
-                            <Stack 
-                                paddingLeft={2} 
-                                paddingRight={2} 
-                                flexDirection={'row'} 
-                                justifySelf={'flex-end'} 
-                                alignSelf={'flex-end'} 
-                                columnGap={is488?1:2}
-                            >
-                                <Button 
-                                    component={Link} 
-                                    to={`/admin/product-update/${product._id}`} 
-                                    variant='contained'
-                                >
-                                    Update
-                                </Button>
-                                {product.isDeleted === true ? (
-                                    <Button 
-                                        onClick={()=>handleProductUnDelete(product._id)} 
-                                        color='error' 
-                                        variant='outlined'
-                                    >
-                                        Un-delete
-                                    </Button>
-                                ) : (
-                                    <Button 
-                                        onClick={()=>handleProductDelete(product._id)} 
-                                        color='error' 
-                                        variant='outlined'
-                                    >
-                                        Delete
-                                    </Button>
-                                )}
+
+                            {/* brand filters */}
+                            <Stack mt={2}>
+                                <Accordion>
+                                    <AccordionSummary expandIcon={<AddIcon />}>
+                                        <Stack direction="row" justifyContent="space-between" width="100%" alignItems="center">
+                                            <Typography>Brands</Typography>
+                                            <Button 
+                                                size="small" 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleOpenBrandDialog();
+                                                }}
+                                            >
+                                                Add Brand
+                                            </Button>
+                                        </Stack>
+                                    </AccordionSummary>
+
+                                    <AccordionDetails sx={{p:0}}>
+                                        <FormGroup onChange={handleBrandFilters}>
+                                            {brands?.map((brand)=>(
+                                                <motion.div style={{width:"fit-content"}} whileHover={{x:5}} whileTap={{scale:0.9}}>
+                                                    <FormControlLabel 
+                                                        sx={{ml:1}} 
+                                                        control={<Checkbox whileHover={{scale:1.1}} />} 
+                                                        label={brand.name} 
+                                                        value={brand._id} 
+                                                    />
+                                                </motion.div>
+                                            ))}
+                                        </FormGroup>
+                                    </AccordionDetails>
+                                </Accordion>
+                            </Stack>
+
+                            {/* category filters */}
+                            <Stack mt={2}>
+                                <Accordion>
+                                    <AccordionSummary expandIcon={<AddIcon />} aria-controls="brand-filters" id="brand-filters">
+                                        <Typography>Category</Typography>
+                                    </AccordionSummary>
+
+                                    <AccordionDetails sx={{p:0}}>
+                                        <FormGroup onChange={handleCategoryFilters}>
+                                            {categories?.map((category)=>(
+                                                <motion.div style={{width:"fit-content"}} whileHover={{x:5}} whileTap={{scale:0.9}}>
+                                                    <FormControlLabel 
+                                                        sx={{ml:1}} 
+                                                        control={<Checkbox whileHover={{scale:1.1}} />} 
+                                                        label={category.name} 
+                                                        value={category._id} 
+                                                    />
+                                                </motion.div>
+                                            ))}
+                                        </FormGroup>
+                                    </AccordionDetails>
+                                </Accordion>
                             </Stack>
                         </Stack>
-                    ))}
-                </Grid>
+                    </motion.div>
 
+                    <Stack rowGap={5} mt={is600?2:5} mb={'3rem'}>
+                        {/* sort options */}
+                        <Stack flexDirection={'row'} mr={'2rem'} justifyContent={'flex-end'} alignItems={'center'} columnGap={5}>
+                            <Stack alignSelf={'flex-end'} width={'12rem'}>
+                                <FormControl fullWidth>
+                                    <InputLabel id="sort-dropdown">Sort</InputLabel>
+                                    <Select
+                                        variant='standard'
+                                        labelId="sort-dropdown"
+                                        label="Sort"
+                                        onChange={(e)=>setSort(e.target.value)}
+                                        value={sort}
+                                    >
+                                        <MenuItem bgcolor='text.secondary' value={null}>Reset</MenuItem>
+                                        {sortOptions.map((option)=>(
+                                            <MenuItem key={option} value={option}>{option.name}</MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Stack>
+                        </Stack>
+            
+                        <Grid gap={2} container flex={1} justifyContent={'center'} alignContent={"center"}>
+                            {products.map((product)=>(
+                                <Stack key={product._id}>
+                                    <Stack sx={{opacity:product.isDeleted?.7:1}}>
+                                        <ProductCard 
+                                            id={product._id}
+                                            title={product.title}
+                                            thumbnail={product.thumbnail}
+                                            images={product.images}
+                                            brand={product.brand?.name}
+                                            price={parseFloat(product.price)}
+                                            stockQuantity={product.stockQuantity}
+                                            isAdminCard={true}
+                                        />
+                                    </Stack>
+                                    <Stack 
+                                        paddingLeft={2} 
+                                        paddingRight={2} 
+                                        flexDirection={'row'} 
+                                        justifySelf={'flex-end'} 
+                                        alignSelf={'flex-end'} 
+                                        columnGap={is488?1:2}
+                                    >
+                                        <Button 
+                                            component={Link} 
+                                            to={`/admin/product-update/${product._id}`} 
+                                            variant='contained'
+                                        >
+                                            Update
+                                        </Button>
+                                        {product.isDeleted === true ? (
+                                            <Button 
+                                                onClick={()=>handleProductUnDelete(product._id)} 
+                                                color='error' 
+                                                variant='outlined'
+                                            >
+                                                Un-delete
+                                            </Button>
+                                        ) : (
+                                            <Button 
+                                                onClick={()=>handleProductDelete(product._id)} 
+                                                color='error' 
+                                                variant='outlined'
+                                            >
+                                                Delete
+                                            </Button>
+                                        )}
+                                    </Stack>
+                                </Stack>
+                            ))}
+                        </Grid>
+
+                        <Stack alignSelf={is488?'center':'flex-end'} mr={is488?0:5} rowGap={2} p={is488?1:0}>
+                            <Pagination 
+                                size={is488?'medium':'large'} 
+                                page={page}  
+                                onChange={(e,page)=>setPage(page)} 
+                                count={Math.ceil(totalResults/ITEMS_PER_PAGE)} 
+                                variant="outlined" 
+                                shape="rounded" 
+                            />
+                            <Typography textAlign={'center'}>
+                                Showing {(page-1)*ITEMS_PER_PAGE+1} to {page*ITEMS_PER_PAGE>totalResults?totalResults:page*ITEMS_PER_PAGE} of {totalResults} results
+                            </Typography>
+                        </Stack>    
+                    </Stack> 
+                </motion.div>
+            )}
+
+            {activeTab === 1 && (
+                <SalesDashboard />
+            )}
+
+            {activeTab === 2 && (
                 <CouponManagement 
-                  coupons={coupons}
-                  setCoupons={setCoupons}
-                  handleOpenCouponDialog={handleOpenCouponDialog}
-                  handleEditCoupon={handleEditCoupon}
-                  handleDeleteCoupon={handleDeleteCoupon}
+                    coupons={coupons}
+                    setCoupons={setCoupons}
+                    handleOpenCouponDialog={handleOpenCouponDialog}
+                    handleEditCoupon={handleEditCoupon}
+                    handleDeleteCoupon={handleDeleteCoupon}
                 />
+            )}
 
-                <Stack alignSelf={is488?'center':'flex-end'} mr={is488?0:5} rowGap={2} p={is488?1:0}>
-                    <Pagination 
-                        size={is488?'medium':'large'} 
-                        page={page}  
-                        onChange={(e,page)=>setPage(page)} 
-                        count={Math.ceil(totalResults/ITEMS_PER_PAGE)} 
-                        variant="outlined" 
-                        shape="rounded" 
-                    />
-                    <Typography textAlign={'center'}>
-                        Showing {(page-1)*ITEMS_PER_PAGE+1} to {page*ITEMS_PER_PAGE>totalResults?totalResults:page*ITEMS_PER_PAGE} of {totalResults} results
-                    </Typography>
-                </Stack>    
-            </Stack> 
-
+            {/* Keep dialogs outside of tabs */}
             <AddBrand 
                 open={openBrandDialog} 
                 handleClose={handleCloseBrandDialog}

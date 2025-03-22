@@ -36,13 +36,15 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { noOrdersAnimation } from '../../../assets/index';
 import Lottie from 'lottie-react';
+import { useNavigate } from 'react-router-dom';
 
 export const AdminOrders = () => {
   const dispatch = useDispatch();
-  const orders = useSelector(selectOrders) || []; // Provide default empty array
+  const navigate = useNavigate();
+  const orders = useSelector(selectOrders) || [];
   const orderFetchStatus = useSelector(selectOrderFetchStatus);
-  const [editIndex, setEditIndex] = useState(-1);
   const orderUpdateStatus = useSelector(selectOrderUpdateStatus);
+  const [editIndex, setEditIndex] = useState(-1);
   const theme = useTheme();
   const is1620 = useMediaQuery(theme.breakpoints.down(1620));
   const is1200 = useMediaQuery(theme.breakpoints.down(1200));
@@ -55,8 +57,15 @@ export const AdminOrders = () => {
   console.log('Redux State:', state);
 
   useEffect(() => {
-    dispatch(getAllOrdersAsync());
-  }, [dispatch]);
+    dispatch(getAllOrdersAsync())
+      .unwrap()
+      .catch(error => {
+        if (error.message?.includes('Please login')) {
+          navigate('/login');
+        }
+        toast.error(error.message || 'Failed to fetch orders');
+      });
+  }, [dispatch, navigate]);
 
   useEffect(() => {
     if (orderUpdateStatus === 'fulfilled') {
@@ -72,10 +81,18 @@ export const AdminOrders = () => {
     };
   }, []);
 
-  const handleUpdateOrder = (data) => {
-    const update = { ...data, _id: orders[editIndex]._id };
-    setEditIndex(-1);
-    dispatch(updateOrderByIdAsync(update));
+  const handleUpdateOrder = async (data) => {
+    try {
+      const update = { ...data, _id: orders[editIndex]._id };
+      await dispatch(updateOrderByIdAsync(update)).unwrap();
+      setEditIndex(-1);
+      toast.success('Order updated successfully');
+    } catch (error) {
+      toast.error(error.message || 'Failed to update order');
+      if (error.message?.includes('Unauthorized')) {
+        navigate('/login');
+      }
+    }
   };
 
   const editOptions = [
