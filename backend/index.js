@@ -25,7 +25,7 @@ connectToDB()
 
 
 // middlewares
-server.use(cors({origin:process.env.ORIGIN || 'https://apex-store-frontend.onrender.com',credentials:true,exposedHeaders:['X-Total-Count'],methods:['GET','POST','PATCH','DELETE']}))
+server.use(cors({origin:process.env.ORIGIN || 'https://apex-store-eyym.onrender.com',credentials:true,exposedHeaders:['X-Total-Count'],methods:['GET','POST','PATCH','DELETE']}))
 server.use(express.json())
 server.use(express.urlencoded({ extended: true }));
 server.use(cookieParser())
