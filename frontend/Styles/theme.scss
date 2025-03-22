@@ -38,6 +38,18 @@ body {
   to { transform: translateY(0); opacity: 1; }
 }
 
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 // Components
 .MuiCard-root {
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
@@ -161,4 +173,15 @@ body {
 @keyframes loading {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+.animated-background {
+  background: linear-gradient(-45deg, 
+    rgba(25, 118, 210, 0.1),
+    rgba(66, 165, 245, 0.1),
+    rgba(46, 125, 50, 0.1), 
+    rgba(21, 101, 192, 0.1)
+  );
+  background-size: 400% 400%;
+  animation: gradientAnimation 15s ease infinite;
 }

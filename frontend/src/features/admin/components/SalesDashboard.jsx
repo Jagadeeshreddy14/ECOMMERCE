@@ -42,18 +42,21 @@ import { useSelector, useDispatch } from 'react-redux';
 import { selectOrders } from '../../order/OrderSlice';
 import { selectProducts, fetchProducts, selectProductStatus } from '../../product/productSlice'; // Update this
 import { formatPrice } from '../../../utils/formatPrice';
+import { DASHBOARD_COLORS } from '../../../constants/colors';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+// Update the COLORS constant
+const COLORS = DASHBOARD_COLORS.chart;
 
+// Update StatsCard component styles
 const StatsCard = ({ title, value, icon, color }) => (
     <Card sx={{ 
         height: '100%',
-        background: `linear-gradient(135deg, ${alpha(color, 0.1)} 0%, white 100%)`,
+        background: `linear-gradient(135deg, ${alpha(color, 0.08)} 0%, white 100%)`,
         border: `1px solid ${alpha(color, 0.2)}`,
-        transition: 'transform 0.2s',
+        transition: 'all 0.3s ease',
         '&:hover': {
             transform: 'translateY(-4px)',
-            boxShadow: 3
+            boxShadow: `0 8px 20px ${alpha(color, 0.2)}`
         }
     }}>
         <CardContent>
@@ -62,7 +65,11 @@ const StatsCard = ({ title, value, icon, color }) => (
                     p: 1.5, 
                     borderRadius: 2, 
                     bgcolor: alpha(color, 0.1),
-                    color: color 
+                    color: color,
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                        bgcolor: alpha(color, 0.15)
+                    }
                 }}>
                     {icon}
                 </Box>
@@ -70,7 +77,7 @@ const StatsCard = ({ title, value, icon, color }) => (
                     <Typography color="text.secondary" variant="body2">
                         {title}
                     </Typography>
-                    <Typography variant="h5" fontWeight="bold">
+                    <Typography variant="h5" fontWeight="bold" sx={{ color }}>
                         {value}
                     </Typography>
                 </Stack>
@@ -188,7 +195,7 @@ export const SalesDashboard = () => {
                         title="Total Revenue"
                         value={formatPrice(stats.totalRevenue)}
                         icon={<Payment sx={{ fontSize: 24 }} />}
-                        color="#2196F3"
+                        color={DASHBOARD_COLORS.primary.main}
                     />
                 </Grid>
                 <Grid item xs={12} sm={4}>
@@ -196,7 +203,7 @@ export const SalesDashboard = () => {
                         title="Total Orders"
                         value={stats.totalOrders}
                         icon={<ShoppingCart sx={{ fontSize: 24 }} />}
-                        color="#4CAF50"
+                        color={DASHBOARD_COLORS.success.main}
                     />
                 </Grid>
                 <Grid item xs={12} sm={4}>
@@ -204,18 +211,18 @@ export const SalesDashboard = () => {
                         title="Average Order Value"
                         value={formatPrice(stats.averageOrderValue)}
                         icon={<TrendingUp sx={{ fontSize: 24 }} />}
-                        color="#FF9800"
+                        color={DASHBOARD_COLORS.warning.main}
                     />
                 </Grid>
             </Grid>
 
-            <Grid container spacing={3}>
+            <Grid container spacing={3} mt={2}>
                 <Grid item xs={12} sm={4}>
                     <StatsCard
                         title="Total Products"
                         value={stats.totalProducts}
                         icon={<Inventory sx={{ fontSize: 24 }} />}
-                        color="#9C27B0"
+                        color={DASHBOARD_COLORS.info.main}
                     />
                 </Grid>
                 <Grid item xs={12} sm={4}>
@@ -223,26 +230,16 @@ export const SalesDashboard = () => {
                         title="In Stock Products"
                         value={`${stats.inStockProducts} (${Math.round((stats.inStockProducts / stats.totalProducts) * 100)}%)`}
                         icon={<Inventory sx={{ fontSize: 24 }} />}
-                        color="#4CAF50"
+                        color={DASHBOARD_COLORS.success.main}
                     />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                    <Paper sx={{ p: 2 }}>
-                        <Stack spacing={2}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', color: '#f44336' }}>
-                                <Warning sx={{ mr: 1 }} />
-                                <Typography variant="body2">
-                                    Out of Stock: {stats.outOfStockProducts}
-                                </Typography>
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', color: '#ff9800' }}>
-                                <Warning sx={{ mr: 1 }} />
-                                <Typography variant="body2">
-                                    Low Stock: {stats.lowStockProducts}
-                                </Typography>
-                            </Box>
-                        </Stack>
-                    </Paper>
+                    <StatsCard
+                        title="Out of Stock"
+                        value={stats.outOfStockProducts}
+                        icon={<Warning sx={{ fontSize: 24 }} />}
+                        color={DASHBOARD_COLORS.error.main}
+                    />
                 </Grid>
             </Grid>
 
@@ -272,10 +269,18 @@ export const SalesDashboard = () => {
                                 <Line 
                                     type="monotone" 
                                     dataKey="revenue" 
-                                    stroke="#2196F3"
+                                    stroke={DASHBOARD_COLORS.primary.main}
                                     strokeWidth={2}
-                                    dot={{ r: 4 }}
-                                    activeDot={{ r: 6 }}
+                                    dot={{ 
+                                        r: 4, 
+                                        fill: DASHBOARD_COLORS.primary.main,
+                                        strokeWidth: 2
+                                    }}
+                                    activeDot={{ 
+                                        r: 6, 
+                                        fill: DASHBOARD_COLORS.primary.light,
+                                        strokeWidth: 0 
+                                    }}
                                 />
                             </LineChart>
                         </ResponsiveContainer>
@@ -306,7 +311,7 @@ export const SalesDashboard = () => {
                                     {stats.categoryDistribution.map((entry, index) => (
                                         <Cell 
                                             key={`cell-${index}`} 
-                                            fill={COLORS[index % COLORS.length]} 
+                                            fill={DASHBOARD_COLORS.chart[index % DASHBOARD_COLORS.chart.length]} 
                                         />
                                     ))}
                                 </Pie>

@@ -24,6 +24,7 @@ import { ProductBanner } from './ProductBanner'
 import ClearIcon from '@mui/icons-material/Clear';
 import Lottie from 'lottie-react'
 import { useNavigate } from 'react-router-dom'
+import './ProductList.css'; // Import the CSS file for animations
 
 
 const sortOptions=[
@@ -180,7 +181,7 @@ export const ProductList = () => {
     }
 
   return (
-    <>
+    <div className="animated-bg"> {/* Add a wrapper with the animated background */}
     {/* filters side bar */}
 
     {
@@ -330,6 +331,6 @@ export const ProductList = () => {
         </>
     }
 
-    </>
+    </div>
   )
 }

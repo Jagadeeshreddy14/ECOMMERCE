@@ -59,6 +59,7 @@
     ]
   },
   "devDependencies": {
+    "gh-pages": "^6.3.0",
     "json-loader": "^0.5.7"
   }
 }
