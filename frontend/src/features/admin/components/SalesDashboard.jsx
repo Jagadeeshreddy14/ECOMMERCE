@@ -12,7 +12,8 @@ import {
     Divider,
     IconButton,
     Tooltip,
-    alpha
+    alpha,
+    CircularProgress // Add this
 } from '@mui/material';
 import {
     BarChart,
@@ -33,10 +34,13 @@ import {
     TrendingUp, 
     ShoppingCart, 
     Payment,
-    InfoOutlined 
+    InfoOutlined,
+    Inventory, // Add this
+    Warning // Add this
 } from '@mui/icons-material';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { selectOrders } from '../../order/OrderSlice';
+import { selectProducts, fetchProducts, selectProductStatus } from '../../product/productSlice'; // Update this
 import { formatPrice } from '../../../utils/formatPrice';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
@@ -76,7 +80,16 @@ const StatsCard = ({ title, value, icon, color }) => (
 );
 
 export const SalesDashboard = () => {
+    const dispatch = useDispatch();
+    
+    // Add this useEffect
+    useEffect(() => {
+        dispatch(fetchProducts());
+    }, [dispatch]);
+
     const orders = useSelector(selectOrders);
+    const products = useSelector(selectProducts); // Add this
+    const productStatus = useSelector(selectProductStatus); // Add this
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [stats, setStats] = useState({
@@ -85,7 +98,11 @@ export const SalesDashboard = () => {
         averageOrderValue: 0,
         recentOrders: [],
         monthlyRevenue: [],
-        categoryDistribution: []
+        categoryDistribution: [],
+        totalProducts: 0,
+        inStockProducts: 0,
+        outOfStockProducts: 0,
+        lowStockProducts: 0
     });
 
     useEffect(() => {
@@ -93,6 +110,12 @@ export const SalesDashboard = () => {
             calculateStats(orders);
         }
     }, [orders]);
+
+    useEffect(() => {
+        if (products?.length) {
+            calculateProductStats(products);
+        }
+    }, [products]);
 
     const calculateStats = (orders) => {
         const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
@@ -130,6 +153,29 @@ export const SalesDashboard = () => {
         });
     };
 
+    const calculateProductStats = (products) => {
+        const inStock = products.filter(p => p.stock > 0).length;
+        const outOfStock = products.filter(p => p.stock === 0).length;
+        const lowStock = products.filter(p => p.stock > 0 && p.stock <= 5).length;
+
+        setStats(prev => ({
+            ...prev,
+            totalProducts: products.length,
+            inStockProducts: inStock,
+            outOfStockProducts: outOfStock,
+            lowStockProducts: lowStock
+        }));
+    };
+
+    // Add loading check before rendering
+    if (productStatus === 'loading') {
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                <CircularProgress />
+            </Box>
+        );
+    }
+
     return (
         <Stack spacing={3} p={3}>
             <Typography variant="h4" fontWeight="bold" gutterBottom>
@@ -160,6 +206,43 @@ export const SalesDashboard = () => {
                         icon={<TrendingUp sx={{ fontSize: 24 }} />}
                         color="#FF9800"
                     />
+                </Grid>
+            </Grid>
+
+            <Grid container spacing={3}>
+                <Grid item xs={12} sm={4}>
+                    <StatsCard
+                        title="Total Products"
+                        value={stats.totalProducts}
+                        icon={<Inventory sx={{ fontSize: 24 }} />}
+                        color="#9C27B0"
+                    />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                    <StatsCard
+                        title="In Stock Products"
+                        value={`${stats.inStockProducts} (${Math.round((stats.inStockProducts / stats.totalProducts) * 100)}%)`}
+                        icon={<Inventory sx={{ fontSize: 24 }} />}
+                        color="#4CAF50"
+                    />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                    <Paper sx={{ p: 2 }}>
+                        <Stack spacing={2}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', color: '#f44336' }}>
+                                <Warning sx={{ mr: 1 }} />
+                                <Typography variant="body2">
+                                    Out of Stock: {stats.outOfStockProducts}
+                                </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', color: '#ff9800' }}>
+                                <Warning sx={{ mr: 1 }} />
+                                <Typography variant="body2">
+                                    Low Stock: {stats.lowStockProducts}
+                                </Typography>
+                            </Box>
+                        </Stack>
+                    </Paper>
                 </Grid>
             </Grid>
 
