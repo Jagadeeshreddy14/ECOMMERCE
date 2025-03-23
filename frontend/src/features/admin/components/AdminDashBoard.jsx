@@ -40,7 +40,7 @@ import { toast } from 'react-toastify';
 import { SalesDashboard } from './SalesDashboard';
 
 // Configure axios base URL
-axios.defaults.baseURL = 'https://apex-store-backend-y1tk.onrender.com';
+axios.defaults.baseURL = 'https://apex-store-backend.onrender.com';
 
 const sortOptions=[
     {name:"Price: low to high",sort:"price",order:"asc"},
