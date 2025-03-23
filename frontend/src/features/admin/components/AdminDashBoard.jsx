@@ -40,7 +40,7 @@ import { toast } from 'react-toastify';
 import { SalesDashboard } from './SalesDashboard';
 
 // Configure axios base URL
-axios.defaults.baseURL = 'https://apex-store-backend.onrender.com';
+axios.defaults.baseURL = 'https://apex-store-backend-y1tk.onrender.com';
 
 const sortOptions=[
     {name:"Price: low to high",sort:"price",order:"asc"},
@@ -81,8 +81,8 @@ const CouponManagement = ({ coupons, setCoupons, handleOpenCouponDialog, handleE
                 <TableCell>{new Date(coupon.endDate).toLocaleDateString()}</TableCell>
                 <TableCell>
                   <Chip 
-                    label={coupon.isActive ? 'Active' : 'Inactive'}
-                    color={coupon.isActive ? 'success' : 'error'}
+                    label={coupon.isActive ? 'Inactive' : 'Active'}
+                    color={coupon.isActive ? 'error' : 'success'}
                   />
                 </TableCell>
                 <TableCell>
