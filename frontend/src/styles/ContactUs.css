@@ -1,0 +1,418 @@
+/* Hero Section */
+.hero-section {
+  background: linear-gradient(135deg, rgba(29, 84, 213, 0.9) 60%, rgba(34, 197, 94, 0.8) 100%);
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 4rem 0;
+  margin-bottom: 2rem;
+  color: white;
+  text-align: center;
+  border-bottom: 5px solid rgba(34, 197, 94, 0.8);
+}
+
+.hero-section h1 {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  animation: fadeIn 1s ease-in-out;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.hero-section p {
+  font-size: 1.25rem;
+  max-width: 800px;
+  margin: 0 auto;
+  animation: fadeInUp 1s ease-in-out;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/jpeg;base64,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') repeat;
+  opacity: 0.1;
+}
+
+/* Contact Cards */
+.contact-card {
+  border-radius: 15px; /* Rounded corners for a modern look */
+  transition: all 0.3s ease;
+  background: white;
+  overflow: hidden;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Softer shadow */
+  cursor: pointer;
+  margin: 6px; /* Maintain at least 6px spacing between cards */
+}
+
+.contact-card:hover {
+  transform: translateY(-8px); /* Slight lift on hover */
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+}
+
+/* Icon Container */
+.icon-container {
+  background: rgba(34, 197, 94, 0.1); /* Light green background */
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  position: relative;
+  z-index: 1;
+  animation: bounce 2s infinite;
+}
+
+.icon-container::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: inherit;
+  border-radius: inherit;
+  z-index: -1;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.icon-container svg {
+  color: #22c55e; /* Bright green */
+  font-size: 2rem;
+}
+
+/* Grid Layout for Cards */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid */
+  gap: 6px; /* Maintain 6px spacing between cards */
+}
+
+/* Contact Form Section */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+form label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #374151; /* Dark gray */
+}
+
+form input,
+form textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db; /* Light gray */
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  background: #f9fafb; /* Light background for inputs */
+}
+
+form input:focus,
+form textarea:focus {
+  border-color: #22c55e; /* Bright green */
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+}
+
+form textarea {
+  resize: none;
+}
+
+form button {
+  background-color: #22c55e; /* Bright green */
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+form button:hover {
+  background-color: #16a34a; /* Darker green */
+  transform: scale(1.05);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+}
+
+form button:disabled {
+  background-color: #9ca3af; /* Gray for disabled state */
+  cursor: not-allowed;
+}
+
+form button .animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Loader Animation */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Form Container */
+.bg-white {
+  background-color: #ffffff;
+}
+
+.rounded-lg {
+  border-radius: 15px;
+}
+
+.shadow-lg {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.text-center { /* Dark gray */
+  text-align: center;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+}
+
+.text-gray-700 {
+  color: #4a5568;
+}
+
+.text-gray-600 {
+  color: #718096;
+}
+
+.text-green-600 {
+  color: #4caf50;
+}
+
+.transition-colors {
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.disabled\:opacity-50 {
+  opacity: 0.5;
+}
+
+.disabled\:cursor-not-allowed {
+  cursor: not-allowed;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.5;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .hero-section {
+    min-height: 30vh;
+    padding: 2rem 0;
+  }
+
+  .hero-section h1 {
+    font-size: 2.5rem;
+  }
+
+  .hero-section p {
+    font-size: 1rem;
+  }
+
+  .icon-container {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+/* Contact Form Section */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.bg-white {
+  background-color: #ffffff;
+}
+
+.rounded-sm {
+  border-radius: 10px;
+}
+
+.shadow-lg {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.p-8 {
+  padding: 2rem;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.space-y-6 > * + * {
+  margin-top: 1.5rem;
+}
+
+/* Input and Textarea Styling */
+form input,
+form textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+form input:focus,
+form textarea:focus {
+  border-color: #4caf50;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
+form textarea {
+  resize: none;
+}
+
+/* Label Styling */
+form label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* Button Styling */
+form button {
+  background-color: #22c55e; /* Bright green */
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+form button:hover {
+  background-color: #16a34a; /* Darker green */
+  transform: scale(1.05);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+}
+
+form button:disabled {
+  background-color: #9ca3af; /* Gray for disabled state */
+  cursor: not-allowed;
+}
+
+form button .animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Loader Animation */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .p-8 {
+    padding: 1.5rem;
+  }
+
+  .text-2xl {
+    font-size: 1.25rem;
+  }
+
+  form button {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+  }
+}

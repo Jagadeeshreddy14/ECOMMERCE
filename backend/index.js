@@ -25,11 +25,11 @@ connectToDB()
 
 
 // middlewares
-server.use(cors({origin:process.env.ORIGIN || 'https://apex-store-eyym.onrender.com',credentials:true,exposedHeaders:['X-Total-Count'],methods:['GET','POST','PATCH','DELETE']}))
+server.use(cors({origin:process.env.ORIGIN || 'https://localhost:8000',credentials:true,exposedHeaders:['X-Total-Count'],methods:['GET','POST','PATCH','DELETE']}))
 server.use(express.json())
 server.use(express.urlencoded({ extended: true }));
 server.use(cookieParser())
-server.use(morgan("tiny"))
+server.use(morgan("tiny"))  
 
 // Add error logging middleware
 server.use((err, req, res, next) => {

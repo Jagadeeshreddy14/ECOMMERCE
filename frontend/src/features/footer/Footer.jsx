@@ -4,7 +4,7 @@ import React from 'react';
 import { QRCodePng, appStorePng, googlePlayPng, facebookPng, instagramPng, twitterPng, linkedinPng } from '../../assets';
 import SendIcon from '@mui/icons-material/Send';
 import { MotionConfig, motion } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export const Footer = () => {
     const theme = useTheme();
@@ -59,7 +59,8 @@ export const Footer = () => {
                     <Typography sx={labelStyles} onClick={() => handleNavigate('/privacy-policy')}>Privacy Policy</Typography>
                     <Typography sx={labelStyles} onClick={() => handleNavigate('/terms-of-use')}>Terms Of Use</Typography>
                     <Typography sx={labelStyles} onClick={() => handleNavigate('/faq')}>FAQ</Typography>
-                    <Typography sx={labelStyles} onClick={() => handleNavigate('/contact')}>Contact</Typography>
+                    <Typography sx={labelStyles} onClick={() => handleNavigate('/contact')}>ContactUs</Typography>
+                    <Typography sx={labelStyles} onClick={() => handleNavigate('/')}>Home</Typography>
                 </Stack>
 
                 {/* Download App Section */}
@@ -105,3 +106,5 @@ export const Footer = () => {
         </Stack>
     );
 };
+
+export default Footer;

@@ -81,8 +81,8 @@ const CouponManagement = ({ coupons, setCoupons, handleOpenCouponDialog, handleE
                 <TableCell>{new Date(coupon.endDate).toLocaleDateString()}</TableCell>
                 <TableCell>
                   <Chip 
-                    label={coupon.isActive ? 'Active' : 'Inactive'}
-                    color={coupon.isActive ? 'success' : 'error'}
+                    label={coupon.isActive ? 'inactive' : 'Active'}
+                    color={coupon.isActive ? 'error' : 'success'}
                   />
                 </TableCell>
                 <TableCell>
