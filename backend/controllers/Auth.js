@@ -277,33 +277,41 @@ exports.checkAuth=async(req,res)=>{
 
 exports.googleSignIn = async (req, res) => {
     try {
-      const { token } = req.body;
-      const ticket = await client.verifyIdToken({
-        idToken: token,
-        audience: process.env.GOOGLE_CLIENT_ID
-      });
-  
-      const { email, name, picture } = ticket.getPayload();
-      let user = await User.findOne({ email });
-  
-      if (!user) {
-        user = await User.create({
-          email,
-          name,
-          avatar: picture,
-          isVerified: true,
-          authProvider: 'google'
+        const { credential } = req.body;
+
+        // Verify the Google ID token
+        const ticket = await client.verifyIdToken({
+            idToken: credential,
+            audience: process.env.GOOGLE_CLIENT_ID,
         });
-      }
-  
-      const authToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-      res.status(200).json({ token: authToken, user });
-  
+
+        const { email, name, picture } = ticket.getPayload();
+
+        // Check if the user exists
+        let user = await User.findOne({ email });
+
+        if (!user) {
+            // Create a new user if not found
+            user = await User.create({
+                email,
+                name,
+                avatar: picture,
+                isVerified: true,
+                authProvider: 'google',
+            });
+        }
+
+        // Generate a JWT token
+        const authToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+            expiresIn: '7d',
+        });
+
+        res.status(200).json({ token: authToken, user });
     } catch (error) {
-      console.error('Google sign in error:', error);
-      res.status(500).json({ message: 'Authentication failed' });
+        console.error('Google Sign-In Error:', error);
+        res.status(500).json({ message: 'Authentication failed' });
     }
-  };
+};
 
 // Send OTP via SMS
 exports.sendMobileOTP = async (req, res) => {

@@ -1,5 +1,5 @@
 import {Box, FormHelperText, Stack, TextField, Typography, useMediaQuery, useTheme, Container, Paper } from '@mui/material'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Lottie from 'lottie-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from "react-hook-form"
@@ -10,6 +10,8 @@ import {selectLoggedInUser,loginAsync,selectLoginStatus, selectLoginError, clear
 import { toast } from 'react-toastify'
 import {MotionConfig, motion} from 'framer-motion'
 import { alpha } from '@mui/material/styles';
+import { GoogleLogin } from '@react-oauth/google';
+import { axiosi } from '../../../config/axios';
 
 export const Login = () => {
   const dispatch=useDispatch()
@@ -21,6 +23,7 @@ export const Login = () => {
   const theme=useTheme()
   const is900=useMediaQuery(theme.breakpoints.down(900))
   const is480=useMediaQuery(theme.breakpoints.down(480))
+  const [googleLoading, setGoogleLoading] = useState(false);
   
   // handles user redirection
   useEffect(()=>{
@@ -56,6 +59,33 @@ export const Login = () => {
     delete cred.confirmPassword
     dispatch(loginAsync(cred))
   }
+
+  const handleGoogleLoginSuccess = async (credentialResponse) => {
+    setGoogleLoading(true);
+    try {
+      const { credential } = credentialResponse;
+
+      // Send the Google token to the backend
+      const response = await axiosi.post('/auth/google', { credential });
+
+      // Log user details for debugging
+      console.log('User Details:', response.data.user);
+
+      // Redirect based on user verification status
+      if (response.data.user.isVerified) {
+        toast.success('Google Sign-In successful!');
+        navigate("/"); // Redirect to user menu page
+      } else {
+        toast.info('Please verify your account.');
+        navigate('/verify-otp'); // Redirect to OTP verification page
+      }
+    } catch (error) {
+      console.error('Google Sign-In Error:', error);
+      toast.error('Google Sign-In failed. Please try again.');
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   return (
     <Container maxWidth={false} disableGutters>
@@ -212,6 +242,16 @@ export const Login = () => {
                     Sign up now
                   </Link>
                 </Typography>
+              </Stack>
+
+              <Stack spacing={2} alignItems="center">
+                <GoogleLogin
+                  onSuccess={handleGoogleLoginSuccess}
+                  onError={() => {
+                    toast.error('Google Sign-In failed. Please try again.');
+                  }}
+                  disabled={googleLoading}
+                />
               </Stack>
             </Stack>
           </Paper>

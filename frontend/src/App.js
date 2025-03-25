@@ -12,6 +12,7 @@ import { AddProductPage, AdminOrdersPage, CartPage, CheckoutPage, ForgotPassword
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { ContactUs } from './pages/ContactUs'; // Add this import
+import AboutUs from './pages/static/AboutUs';
 
 function App() {
 
@@ -55,6 +56,7 @@ function App() {
             <Route path='/orders' element={<Protected><UserOrdersPage/></Protected>}/>
             <Route path='/wishlist' element={<Protected><WishlistPage/></Protected>}/>
             <Route path='/contact' element={<ContactUs/>}/> {/* Add this line */}
+            <Route path='/about-us' element={<AboutUs/>}/> 
             </>
           )
         }

@@ -48,9 +48,11 @@ export const Footer = () => {
                     <Typography variant='h6'>Account</Typography>
                     <Typography sx={labelStyles} onClick={() => handleNavigate('/profile')}>My Account</Typography>
                     <Typography sx={labelStyles} onClick={() => handleNavigate('/login')}>Login / Register</Typography>
+                    <Typography sx={labelStyles} onClick={() => handleNavigate('/')}>Home</Typography>
                     <Typography sx={labelStyles} onClick={() => handleNavigate('/cart')}>Cart</Typography>
                     <Typography sx={labelStyles} onClick={() => handleNavigate('/wishlist')}>Wishlist</Typography>
                     <Typography sx={labelStyles} onClick={() => handleNavigate('/shop')}>Shop</Typography>
+
                 </Stack>
 
                 {/* Quick Links Section */}
@@ -60,7 +62,8 @@ export const Footer = () => {
                     <Typography sx={labelStyles} onClick={() => handleNavigate('/terms-of-use')}>Terms Of Use</Typography>
                     <Typography sx={labelStyles} onClick={() => handleNavigate('/faq')}>FAQ</Typography>
                     <Typography sx={labelStyles} onClick={() => handleNavigate('/contact')}>ContactUs</Typography>
-                    <Typography sx={labelStyles} onClick={() => handleNavigate('/')}>Home</Typography>
+                   
+                    <Typography sx={labelStyles} onClick={() => handleNavigate('/about-us')}>AboutUs</Typography>
                 </Stack>
 
                 {/* Download App Section */}
