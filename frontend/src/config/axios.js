@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const axiosi = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: 'https://apex-store-backend-y1tk.onrender.com',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
