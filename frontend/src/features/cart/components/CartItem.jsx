@@ -7,7 +7,7 @@ import { deleteCartItemByIdAsync, updateCartItemByIdAsync } from '../CartSlice';
 import { Link } from 'react-router-dom';
 import { formatPrice } from '../../../utils/formatPrice';
 
-export const CartItem = ({id,thumbnail,title,category,brand,price,quantity,stockQuantity,productId}) => {
+export const CartItem = ({id,title,brand,category,price,quantity,thumbnail,stockQuantity,productId, discountAmount}) => {
 
 
     const dispatch=useDispatch()
@@ -60,10 +60,9 @@ export const CartItem = ({id,thumbnail,title,category,brand,price,quantity,stock
         {/* price and remove button */}
         <Stack justifyContent={'space-evenly'} alignSelf={is552?'flex-end':''} height={'100%'} rowGap={'1rem'} alignItems={'flex-end'}>
             <Typography variant='body2' style={{ textDecoration: 'line-through', color: 'gray' }}>{formatPrice(price)}</Typography>
-            
+            <Typography variant='body2'>{formatPrice(price - discountAmount)}</Typography>
             <Button size={is480?"small":""} onClick={handleProductRemove} variant='contained'>Remove</Button>
         </Stack>
-    
     </Stack>
     
   )

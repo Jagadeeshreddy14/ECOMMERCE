@@ -11,7 +11,8 @@ import { formatPrice } from '../../../utils/formatPrice';
 
 export const Cart = ({ checkout }) => {
     const items = useSelector(selectCartItems);
-    const subtotal = items?.reduce((acc, item) => item?.product?.price * item?.quantity + acc, 0) || 0;
+    // Calculate subtotal based on discounted price
+    const subtotal = items?.reduce((acc, item) => (item?.product?.price - (item?.product?.discountAmount || 0)) * item?.quantity + acc, 0) || 0;
     const totalItems = items?.reduce((acc, item) => acc + item?.quantity, 0) || 0;
     const navigate = useNavigate();
     const theme = useTheme();
@@ -62,6 +63,7 @@ export const Cart = ({ checkout }) => {
                             brand={item.product?.brand?.name}
                             category={item.product?.category?.name}
                             price={item.product?.price}
+                            discountAmount={item.product?.discountAmount || 0} // Pass discountAmount to CartItem
                             quantity={item.quantity}
                             thumbnail={item.product?.thumbnail}
                             stockQuantity={item.product?.stockQuantity}

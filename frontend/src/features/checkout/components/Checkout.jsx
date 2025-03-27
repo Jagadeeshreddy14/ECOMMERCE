@@ -95,50 +95,54 @@ const PriceDetail = ({ label, value, type = "regular" }) => (
   </Stack>
 );
 
-const OrderSummaryCard = ({ cartItem }) => (
-  <Paper
-    elevation={0}
-    sx={{
-      p: 2,
-      mb: 1,
-      border: '1px solid',
-      borderColor: 'divider',
-      borderRadius: 1,
-      '&:hover': { bgcolor: 'grey.50' }
-    }}
-  >
-    <Stack direction="row" spacing={2}>
-      <Box
-        component="img"
-        src={cartItem.product.images[0]}
-        alt={cartItem.product.title}
-        sx={{
-          width: 60,
-          height: 60,
-          borderRadius: 1,
-          objectFit: 'cover'
-        }}
-      />
-      <Stack flex={1} justifyContent="space-between">
-        <Typography variant="subtitle2" noWrap>
-          {cartItem.product.title}
-        </Typography>
-        <Stack 
-          direction="row" 
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Typography variant="body2" color="text.secondary">
-            Qty: {cartItem.quantity} × {formatPrice(cartItem.product.price - cartItem.product.discountAmount)}
+const OrderSummaryCard = ({ cartItem }) => {
+  const discountedPrice = cartItem.product.price - cartItem.product.discountAmount;
+
+  return (
+    <Paper
+      elevation={0}
+      sx={{
+        p: 2,
+        mb: 1,
+        border: '1px solid',
+        borderColor: 'divider',
+        borderRadius: 1,
+        '&:hover': { bgcolor: 'grey.50' }
+      }}
+    >
+      <Stack direction="row" spacing={2}>
+        <Box
+          component="img"
+          src={cartItem.product.images[0]}
+          alt={cartItem.product.title}
+          sx={{
+            width: 60,
+            height: 60,
+            borderRadius: 1,
+            objectFit: 'cover'
+          }}
+        />
+        <Stack flex={1} justifyContent="space-between">
+          <Typography variant="subtitle2" noWrap>
+            {cartItem.product.title}
           </Typography>
-          <Typography variant="subtitle2" color="primary.main">
-            {formatPrice((cartItem.product.price - cartItem.product.discountAmount) * cartItem.quantity)}
-          </Typography>
+          <Stack 
+            direction="row" 
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography variant="body2" color="text.secondary">
+              Qty: {cartItem.quantity} × {formatPrice(discountedPrice)}
+            </Typography>
+            <Typography variant="subtitle2" color="primary.main">
+              {formatPrice(discountedPrice * cartItem.quantity)}
+            </Typography>
+          </Stack>
         </Stack>
       </Stack>
-    </Stack>
-  </Paper>
-);
+    </Paper>
+  );
+};
 
 const StyledTextField = ({ icon, ...props }) => (
   <TextField
@@ -178,7 +182,11 @@ export const OrderSummarySection = ({
   handleCreateOrder,
   selectedPaymentMethod
 }) => {
-  const finalAmount = orderTotal + SHIPPING + TAXES - (appliedCoupon ? calculateDiscount(appliedCoupon) : 0);
+  const subtotal = cartItems.reduce((acc, item) => {
+    const discountedPrice = item.product.price - item.product.discountAmount;
+    return acc + (discountedPrice * item.quantity);
+  }, 0);
+  const finalAmount = subtotal + SHIPPING + TAXES - (appliedCoupon ? calculateDiscount(appliedCoupon) : 0);
 
   return (
     <Paper 
@@ -290,7 +298,7 @@ export const OrderSummarySection = ({
             borderColor: 'divider'
           }}
         >
-          <PriceDetail label="Subtotal" value={orderTotal} />
+          <PriceDetail label="Subtotal" value={subtotal} />
           <PriceDetail label="Shipping" value={SHIPPING} />
           <PriceDetail label="Tax" value={TAXES} />
           
@@ -557,7 +565,7 @@ export const Checkout = () => {
   const cartItems = useSelector(selectCartItems);
   const orderStatus = useSelector(selectOrderStatus);
   const currentOrder = useSelector(selectCurrentOrder);
-  const orderTotal = cartItems.reduce((acc, item) => (item.product.price * item.quantity) + acc, 0);
+  // const orderTotal = cartItems.reduce((acc, item) => (item.product.price * item.quantity) + acc, 0);
   const theme = useTheme();
   const is900 = useMediaQuery(theme.breakpoints.down(900));
   const is480 = useMediaQuery(theme.breakpoints.down(480));
@@ -658,6 +666,14 @@ export const Checkout = () => {
       return;
     }
 
+    // Calculate the total amount considering discounts
+    const subtotal = cartItems.reduce((acc, item) => {
+      const discountedPrice = item.product.price - item.product.discountAmount;
+      return acc + (discountedPrice * item.quantity);
+    }, 0);
+    const discountAmount = appliedCoupon ? calculateDiscount(appliedCoupon) : 0;
+    const totalAmount = subtotal + SHIPPING + TAXES - discountAmount;
+
     if (selectedPaymentMethod === 'CARD') {
       // Load Razorpay script
       const script = document.createElement('script');
@@ -668,7 +684,7 @@ export const Checkout = () => {
       script.onload = () => {
         const options = {
           key: "rzp_live_kYGlb6Srm9dDRe", // Replace with your test key
-          amount: (orderTotal + SHIPPING + TAXES) * 100, // Amount in paise
+          amount: totalAmount * 100, // Amount in paise
           currency: "INR",
           name: "Apex Store",
           description: "Order Payment",
@@ -681,8 +697,9 @@ export const Checkout = () => {
                 item: cartItems,
                 address: selectedAddress,
                 paymentMode: selectedPaymentMethod,
-                total: orderTotal + SHIPPING + TAXES,
-                paymentId: response.razorpay_payment_id
+                total: totalAmount,
+                paymentId: response.razorpay_payment_id,
+                discount: discountAmount // Include the discount amount
               };
               dispatch(createOrderAsync(order));
               toast.success('Payment Successful!');
@@ -708,7 +725,8 @@ export const Checkout = () => {
         item: cartItems,
         address: selectedAddress,
         paymentMode: selectedPaymentMethod,
-        total: orderTotal + SHIPPING + TAXES
+        total: totalAmount,
+        discount: discountAmount // Include the discount amount
       };
       dispatch(createOrderAsync(order));
     }
@@ -742,6 +760,12 @@ export const Checkout = () => {
       setAppliedCoupon(null);
     }
   };
+
+  // Calculate the order total considering discounts
+  const orderTotal = cartItems.reduce((acc, item) => {
+    const discountedPrice = item.product.price - item.product.discountAmount;
+    return acc + (discountedPrice * item.quantity);
+  }, 0);
 
   return (
     <Box sx={{ 
