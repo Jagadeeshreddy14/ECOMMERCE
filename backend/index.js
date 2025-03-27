@@ -27,7 +27,7 @@ connectToDB();
 
 // Allow multiple origins
 const allowedOrigins = [
-  'http://localhost:3000', // Development frontend
+   // Development frontend
   'https://apex-store-eyym.onrender.com', // Production frontend
 ];
 
