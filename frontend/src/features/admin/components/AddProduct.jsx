@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link, useNavigate} from 'react-router-dom'
 import { addProductAsync, resetProductAddStatus, selectProductAddStatus,updateProductByIdAsync } from '../../products/ProductSlice'
-import { Button, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography, useMediaQuery, useTheme, Paper } from '@mui/material'
+import { Button, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography, useMediaQuery, useTheme, Paper, Checkbox } from '@mui/material'
 import { useForm } from "react-hook-form"
 import { selectBrands } from '../../brands/BrandSlice'
 import { selectCategories, fetchAllCategoriesAsync } from '../../categories/CategoriesSlice'
@@ -45,48 +45,60 @@ export const AddProduct = () => {
         }
     },[])
 
+    // Watch for changes in price and discountPercentage
+    const price = watch('price', 0); // Default to 0
+    const discount = watch('discountPercentage', 0); // Default to 0
+
+    // Function to calculate the discounted price
+    const calculateDiscountPrice = (price, discount) => {
+        const parsedPrice = parseFloat(price);
+        const parsedDiscount = parseFloat(discount);
+
+        if (!isNaN(parsedPrice) && !isNaN(parsedDiscount)) {
+            const discountAmount = parsedPrice * (parsedDiscount / 100);
+            const finalPrice = parsedPrice - discountAmount;
+            setDiscountedPrice(finalPrice.toFixed(2)); // Update the state with the calculated price
+        } else {
+            setDiscountedPrice(parsedPrice || 0); // Default to the entered price if discount is invalid
+        }
+    };
+
+    // Recalculate discounted price whenever price or discount changes
+    useEffect(() => {
+        calculateDiscountPrice(price, discount);
+    }, [price, discount]);
+
+    // Handle form submission
     const handleAddProduct = (data) => {
         try {
             const price = parseFloat(data.price);
             const discountPercentage = parseFloat(data.discountPercentage) || 0;
-            const discountedPriceValue = parseFloat(discountedPrice);
+
+            // Ensure discountedPrice is recalculated before submission
+            calculateDiscountPrice(price, discountPercentage);
 
             const newProduct = {
                 ...data,
                 price,
                 discountPercentage,
-                discountedPrice: discountedPriceValue,
+                discountedPrice: parseFloat(discountedPrice), // Use the calculated discounted price
                 images: [data.image0, data.image1, data.image2, data.image3].filter(Boolean),
-                isDeleted: false
+                isDeleted: false,
             };
 
             dispatch(addProductAsync(newProduct));
+
+            // Show success toast with original and discounted prices
+            toast.success(
+                `Product added successfully! Original Price: ₹${price}, Discounted Price: ₹${discountedPrice}`
+            );
+
+            // Reset the form after successful submission
+            reset();
         } catch (error) {
             toast.error('Error creating product');
         }
     };
-
-    const calculateDiscountPrice = (price, discount) => {
-        const parsedPrice = parseFloat(price);
-        const parsedDiscount = parseFloat(discount);
-        
-        if (!isNaN(parsedPrice) && !isNaN(parsedDiscount)) {
-            const discountAmount = parsedPrice * (parsedDiscount / 100);
-            const finalPrice = parsedPrice - discountAmount;
-            setDiscountedPrice(finalPrice.toFixed(2));
-        } else {
-            setDiscountedPrice(parsedPrice || 0);
-        }
-    };
-
-    // Add watch to monitor price and discount changes
-    const price = watch('price');
-    const discount = watch('discountPercentage');
-
-    // Update discounted price when price or discount changes
-    useEffect(() => {
-        calculateDiscountPrice(price, discount);
-    }, [price, discount]);
 
   return (
     <Stack 
@@ -235,6 +247,13 @@ export const AddProduct = () => {
 
                 </Stack>
 
+                <Stack flexDirection={'row'} spacing={2}>
+                    <Typography variant="h6" fontWeight={500}>Customizable</Typography>
+                    <Checkbox
+                        {...register("customizable")}
+                        defaultChecked={false}
+                    />
+                </Stack>
 
                 <Stack>
                     <Typography variant='h6' fontWeight={400}  gutterBottom>Description</Typography>
@@ -264,6 +283,11 @@ export const AddProduct = () => {
     
                     </Stack>
 
+                </Stack>
+
+                <Stack>
+                    <Typography variant='h6'  fontWeight={400} gutterBottom>Discount Amount</Typography>
+                    <TextField type='number' {...register("discountAmount")}/>
                 </Stack>
 
             </Stack>

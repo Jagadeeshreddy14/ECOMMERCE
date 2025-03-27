@@ -47,7 +47,7 @@ const AboutUs = () => {
               Discover our story, mission, and the talented individuals behind bringing you the best online shopping experience.
             </p>
             <motion.a
-              href="/shop"
+              href="/"
               className="btn btn-light fw-bold px-4 py-2 shadow"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
@@ -83,7 +83,7 @@ const AboutUs = () => {
               {
                 name: 'DHANUSH',
                 role: 'COO',
-                avatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1480&q=80',
+                avatar: 'https://res.cloudinary.com/docnp0ctp/image/upload/v1742925729/Apex-store/oynzjkp7a82mmpf2lybf.jpg',
                 bio: 'STUDENT',
               },
               {

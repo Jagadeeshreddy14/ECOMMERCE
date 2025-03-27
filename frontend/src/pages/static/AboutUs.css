@@ -85,12 +85,12 @@ body {
 
 /* Team Section */
 .team-section {
-  padding: 4rem 0;
+  padding: 3rem 0; /* Reduce padding */
   text-align: center;
 }
 
 .team-section h2 {
-  font-size: 2.5rem;
+  font-size: 2rem; /* Reduce font size */
   font-weight: bold;
   margin-bottom: 2rem;
 }
@@ -99,28 +99,31 @@ body {
   border: none;
   border-radius: 15px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .team-section .card:hover {
   transform: translateY(-10px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
 }
 
 .team-section .card img {
-  width: 100px;
-  height: 100px;
+  width: 80px; /* Reduce avatar size */
+  height: 80px;
   object-fit: cover;
-  border-radius: 50%;
+  border-radius: 50%; /* Circular avatar */
   margin: 1rem auto;
+  border: 3px solid #f8f9fa; /* Optional border */
 }
 
 .team-section .card-title {
-  font-size: 1.2rem;
+  font-size: 1rem; /* Reduce font size */
   font-weight: bold;
 }
 
 .team-section .card-text {
   color: #6c757d;
+  font-size: 0.85rem; /* Reduce font size */
 }
 
 /* Contact Section */

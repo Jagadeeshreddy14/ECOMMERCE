@@ -17,6 +17,7 @@ import {
   useMediaQuery,
   Button,
   CircularProgress,
+  TextField,
 } from '@mui/material';
 import {
   addToCartAsync,
@@ -82,6 +83,7 @@ const ProductDetails = () => {
   const is480 = useMediaQuery(theme.breakpoints.down(480));
   const is387 = useMediaQuery(theme.breakpoints.down(387));
   const is340 = useMediaQuery(theme.breakpoints.down(340));
+  const [customization, setCustomization] = useState('');
 
   const isProductAlreadyInCart = useMemo(() => {
     return product && cartItems?.some(item => 
@@ -188,7 +190,8 @@ const ProductDetails = () => {
     const item = { 
       user: loggedInUser._id, 
       product: id, 
-      quantity 
+      quantity,
+      customization: product.customizable ? customization : null, // Include customization if enabled
     };
     dispatch(addToCartAsync(item));
     setQuantity(1);
@@ -436,7 +439,37 @@ const ProductDetails = () => {
                           : 'In Stock'}
                       </Typography>
                     </Stack>
-                    <Typography>{formatPrice(product?.price || 0)}</Typography>
+                    <Stack>
+                      <Stack>
+                        {product.discountAmount > 0 && (
+                          <Typography
+                            sx={{
+                              fontWeight: 600,
+                              fontSize: '1rem',
+                              color: 'green', // Or any color you prefer for discounts
+                              textAlign: 'center',
+                              flex: 1
+                            }}
+                          >
+                            Discount: {formatPrice(product.discountAmount)}
+                          </Typography>
+                        )}
+                        <Typography variant="h6" style={{ textDecoration: 'line-through', color: 'gray' }}>
+                          Price: {formatPrice(product.price)}
+                        </Typography>
+                        <Typography
+                          sx={{
+                            fontWeight: 600,
+                            fontSize: '1.2rem',
+                            color: 'primary.main',
+                            textAlign: 'center',
+                            flex: 1
+                          }}
+                        >
+                          Price: {formatPrice(parseFloat(product.price) - parseFloat(product.discountAmount) || 0)}
+                        </Typography>
+                      </Stack>
+                    </Stack>
                   </Stack>
 
                   {/* Description */}
@@ -601,6 +634,19 @@ const ProductDetails = () => {
                           />
                         </motion.div>
                       </Stack>
+                    </Stack>
+                  )}
+
+                  {/* Customization Input */}
+                  {product?.customizable && (
+                    <Stack>
+                      <Typography>Customize Your Product:</Typography>
+                      <TextField
+                        placeholder="Enter customization details"
+                        value={customization}
+                        onChange={(e) => setCustomization(e.target.value)}
+                        fullWidth
+                      />
                     </Stack>
                   )}
 

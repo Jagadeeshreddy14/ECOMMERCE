@@ -3,7 +3,6 @@ const Product=require("../models/Product")
 
 exports.create = async (req, res) => {
   try {
-    // Validate image URLs
     const validateImageUrl = (url) => {
       try {
         new URL(url);
@@ -14,30 +13,26 @@ exports.create = async (req, res) => {
     };
 
     if (!req.body.thumbnail || !validateImageUrl(req.body.thumbnail)) {
-      return res.status(400).json({ 
-        message: 'Valid thumbnail URL is required' 
-      });
+      return res.status(400).json({ message: 'Valid thumbnail URL is required' });
     }
 
     const validImages = req.body.images.filter(validateImageUrl);
     if (!validImages.length) {
-      return res.status(400).json({ 
-        message: 'At least one valid image URL is required' 
-      });
+      return res.status(400).json({ message: 'At least one valid image URL is required' });
     }
 
-    const productData = {
+    const product = new Product({
       ...req.body,
       price: parseFloat(req.body.price),
       discountPercentage: parseFloat(req.body.discountPercentage) || 0,
       stockQuantity: parseInt(req.body.stockQuantity) || 0,
-      images: validImages
-    };
+      images: validImages,
+      customizable: req.body.customizable || false, // Handle customizable field
+      discountAmount: req.body.discountAmount || 0,
+    });
 
-    const product = new Product(productData);
     await product.save();
-    
-    // Populate brand and category
+
     const populatedProduct = await Product.findById(product._id)
       .populate('brand')
       .populate('category');
@@ -47,7 +42,7 @@ exports.create = async (req, res) => {
     console.error('Error creating product:', error);
     res.status(500).json({
       message: 'Error adding product, please try again later',
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -108,16 +103,27 @@ exports.getById=async(req,res)=>{
     }
 }
 
-exports.updateById=async(req,res)=>{
-    try {
-        const {id}=req.params
-        const updated=await Product.findByIdAndUpdate(id,req.body,{new:true})
-        res.status(200).json(updated)
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({message:'Error updating product, please try again later'})
-    }
-}
+exports.updateById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const updatedData = {
+      ...req.body,
+      customizable: req.body.customizable || false, // Update customizable field
+      customizationDetails: req.body.customizationDetails || null, // Update customization details
+      discountAmount: req.body.discountAmount || 0,
+    };
+
+    const updatedProduct = await Product.findByIdAndUpdate(id, updatedData, { new: true })
+      .populate('brand')
+      .populate('category');
+
+    res.status(200).json(updatedProduct);
+  } catch (error) {
+    console.error('Error updating product:', error);
+    res.status(500).json({ message: 'Error updating product, please try again later' });
+  }
+};
 
 exports.undeleteById=async(req,res)=>{
     try {
@@ -171,6 +177,22 @@ exports.updateStock = async (req, res) => {
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
+};
+
+exports.update = async (req, res) => {
+  try {
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      {
+        ...req.body,
+        discountAmount: req.body.discountAmount || 0,
+      },
+      { new: true }
+    );
+    // ... rest of the code
+  } catch (error) {
+    // ... error handling
+  }
 };
 
 

@@ -23,9 +23,11 @@ const productSchema= new Schema({
     },
     discountedPrice: {
         type: Number,
-        default: function() {
-            return this.price * (1 - this.discountPercentage / 100);
-        }
+        required: true
+    },
+    discountAmount: {
+        type: Number,
+        default: 0
     },
     category:{
         type:Schema.Types.ObjectId,
@@ -69,11 +71,19 @@ const productSchema= new Schema({
     },
     images:{
         type:[String],
-        required:true
+        default: []
     },
     isDeleted:{
         type:Boolean,
         default:false
+    },
+    customizable: {
+        type: Boolean,
+        default: false
+    },
+    customizationDetails: {
+        type: Object,
+        default: null
     }
 },{timestamps:true,versionKey:false})
 

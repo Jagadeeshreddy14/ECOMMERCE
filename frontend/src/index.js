@@ -7,7 +7,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
-import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 console.log("Google Client ID:", process.env.REACT_APP_GOOGLE_CLIENT_ID);
 
@@ -20,8 +20,6 @@ root.render(
           <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
             <App />
             <ToastContainer position='top-right' autoClose={1500} closeOnClick />
-            
-
           </GoogleOAuthProvider>
         </Provider>
       </LanguageProvider>

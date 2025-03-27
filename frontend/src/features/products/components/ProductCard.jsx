@@ -23,7 +23,8 @@ export const ProductCard = ({
   handleAddRemoveFromWishlist,
   isWishlistCard = false,
   isAdminCard = false,
-  onClick
+  onClick,
+  discountAmount = 0 // Add discountAmount as a prop with a default value of 0
 }) => {
   // Move useState to the top, before any conditionals
   const [imgError, setImgError] = useState(false);
@@ -96,6 +97,8 @@ export const ProductCard = ({
 
   // Get primary image - try thumbnail first, then first image from array
   const displayImage = thumbnail || (images && images[0]) || fallbackImage;
+
+  const discountedPrice = price - discountAmount;
 
   return (
     <Card 
@@ -215,6 +218,21 @@ export const ProductCard = ({
               </motion.button>
             )}
             
+            {discountAmount > 0 && (
+              <Typography
+                sx={{
+                  fontWeight: 500,
+                  fontSize: '0.9rem',
+                  color: 'green',
+                  textAlign: 'center',
+                  flex: 1,
+                  textDecoration: 'line-through',
+                }}
+              >
+                {formatPrice(price)}
+              </Typography>
+            )}
+
             <Typography 
               sx={{ 
                 fontWeight: 600,
@@ -224,7 +242,7 @@ export const ProductCard = ({
                 flex: 1
               }}
             >
-              {formatPrice(parseFloat(price) || 0)}
+              {formatPrice(discountedPrice)}
             </Typography>
 
             {!isWishlistCard && !isProductAlreadyInCart && !isAdminCard && (

@@ -122,6 +122,11 @@ export const ProductUpdate = () => {
                 </Stack>
 
                 <Stack>
+                    <Typography variant='h6' fontWeight={400}  gutterBottom>Discount Amount</Typography>
+                    <TextField type='number' {...register("discountAmount",{value:selectedProduct.discountAmount})}/>
+                </Stack>
+
+                <Stack>
                     <Typography variant='h6'  fontWeight={400} gutterBottom>Stock Quantity</Typography>
                     <TextField type='number' {...register("stockQuantity",{required:"Stock Quantity is required",value:selectedProduct.stockQuantity})}/>
                 </Stack>

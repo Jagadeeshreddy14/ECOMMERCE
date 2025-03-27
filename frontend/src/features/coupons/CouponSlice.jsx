@@ -1,5 +1,6 @@
 // frontend/src/features/coupons/CouponSlice.jsx
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios'; // Import axios
 
 export const fetchCouponsAsync = createAsyncThunk(
   'coupons/fetchCoupons',
@@ -32,3 +33,9 @@ const couponSlice = createSlice({
       });
   },
 });
+
+export const { } = couponSlice.actions;
+
+export const selectAllCoupons = (state) => state.coupon.list;
+
+export default couponSlice.reducer;

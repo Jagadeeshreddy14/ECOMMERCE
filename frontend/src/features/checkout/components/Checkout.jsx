@@ -129,10 +129,10 @@ const OrderSummaryCard = ({ cartItem }) => (
           alignItems="center"
         >
           <Typography variant="body2" color="text.secondary">
-            Qty: {cartItem.quantity} × {formatPrice(cartItem.product.price)}
+            Qty: {cartItem.quantity} × {formatPrice(cartItem.product.price - cartItem.product.discountAmount)}
           </Typography>
           <Typography variant="subtitle2" color="primary.main">
-            {formatPrice(cartItem.product.price * cartItem.quantity)}
+            {formatPrice((cartItem.product.price - cartItem.product.discountAmount) * cartItem.quantity)}
           </Typography>
         </Stack>
       </Stack>

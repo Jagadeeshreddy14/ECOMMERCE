@@ -413,6 +413,7 @@ export const AdminDashBoard = () => {
                                             images={product.images}
                                             brand={product.brand?.name}
                                             price={parseFloat(product.price)}
+                                            discountAmount={parseFloat(product.discountAmount || 0)} // Pass discountAmount
                                             stockQuantity={product.stockQuantity}
                                             isAdminCard={true}
                                         />
