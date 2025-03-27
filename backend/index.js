@@ -27,13 +27,13 @@ connectToDB();
 
 // Allow multiple origins
 const allowedOrigins = [
-  'http://localhost:3000', // Development frontend
+   // Development frontend
   'https://apex-store-eyym.onrender.com', // Production frontend
 ];
 
 // middlewares
 server.use(cors({
-  origin: ['http://localhost:3000'], // Add your frontend origin
+  origin: ['https://apex-store-eyym.onrender.com'], // Add your frontend origin
   credentials: true,
 }));
 server.use(cors({
