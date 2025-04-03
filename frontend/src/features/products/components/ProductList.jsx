@@ -107,8 +107,6 @@ export const ProductList = () => {
         }
     };
 
-    // ... (other useEffect hooks remain the same) ...
-
     const handleFilterClose = () => {
         dispatch(toggleFilters());
     };
@@ -121,7 +119,8 @@ export const ProductList = () => {
         <Box sx={{ 
             position: 'relative', 
             minHeight: '100vh',
-            background: 'linear-gradient(to bottom, #f8f9fa, #ffffff)'
+            background: '#f5f5f5', // Light gray background
+            padding: '24px'
         }}>
             {/* Static Banner Background */}
             {!is600 && (
@@ -443,9 +442,14 @@ export const ProductList = () => {
                             </Box>
 
                             {/* Product Grid */}
-                            <Grid container spacing={3} sx={{ mb: 4 }}>
+                            <Grid container spacing={3} sx={{ 
+                                mb: 4,
+                                justifyContent: 'center',
+                                maxWidth: '1400px',
+                                margin: '0 auto'
+                            }}>
                                 {products.map((product) => (
-                                    <Grid item key={product._id} xs={12} sm={6} md={4} lg={3}>
+                                    <Grid item xs={12} sm={6} md={4} lg={3} key={product._id}>
                                         <motion.div
                                             whileHover={{ y: -8 }}
                                             transition={{ type: "spring", stiffness: 300 }}
@@ -456,6 +460,7 @@ export const ProductList = () => {
                                                 thumbnail={product.thumbnail} 
                                                 brand={product.brand.name} 
                                                 price={product.price} 
+                                                discountAmount={product.discountAmount}
                                                 handleAddRemoveFromWishlist={handleAddRemoveFromWishlist}
                                                 onClick={() => handleProductClick(product._id)}
                                                 sx={{ 

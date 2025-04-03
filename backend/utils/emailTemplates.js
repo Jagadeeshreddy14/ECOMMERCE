@@ -180,7 +180,7 @@ function getStatusSpecificMessage(status) {
       'Shipped': '🚚',
       'Delivered': '✅'
     };
-    
+
     return `
       <div style="
         width: 44px;
@@ -260,9 +260,9 @@ function getStatusSpecificMessage(status) {
       
       <div style="background: #F1F5F9; padding: 16px; border-radius: 8px; text-align: center;">
         <p style="color: #1E293B; margin: 0; font-size: 15px;">
-          ${status === 'Delivered' ? 'Your order has been delivered!' : 
-            status === 'Shipped' ? 'Your order is on its way!' : 
-            'We\'re processing your order'}
+          ${status === 'Delivered' ? 'Your order has been delivered!' :
+      status === 'Shipped' ? 'Your order is on its way!' :
+        'We\'re processing your order'}
         </p>
       </div>
     </div>
