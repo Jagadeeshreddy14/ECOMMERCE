@@ -10,15 +10,19 @@ import {
 } from '../ProductSlice';
 import {
   Box,
-  Checkbox,
+  Button,
+  Chip,
+  CircularProgress,
+  Grid,
+  IconButton,
   Rating,
   Stack,
+  TextField,
   Typography,
   useMediaQuery,
-  Button,
-  CircularProgress,
-  TextField,
+  useTheme
 } from '@mui/material';
+import { Add, Remove } from '@mui/icons-material';
 import {
   addToCartAsync,
   resetCartItemAddStatus,
@@ -48,7 +52,6 @@ import {
   selectWishlistItemDeleteStatus,
   selectWishlistItems,
 } from '../../wishlist/WishlistSlice';
-import { useTheme } from '@mui/material';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import SwipeableViews from 'react-swipeable-views';
@@ -273,417 +276,398 @@ const ProductDetails = () => {
       </Stack>
     );
   }
-
   return (
-    <>
-      {!(productFetchStatus === 'rejected' && reviewFetchStatus === 'rejected') && (
-        <Stack
-          sx={{ justifyContent: 'center', alignItems: 'center', mb: '2rem', rowGap: '2rem' }}
-        >
-          {(productFetchStatus || reviewFetchStatus) === 'pending' ? (
-            <Stack
-              width={is500 ? '35vh' : '25rem'}
-              height={'calc(100vh - 4rem)'}
-              justifyContent={'center'}
-              alignItems={'center'}
-            >
-              <Lottie animationData={loadingAnimation} />
-            </Stack>
-          ) : !product ? (
-            <Stack height="50vh" justifyContent="center" alignItems="center">
-              <Typography variant="h5">Product not found</Typography>
-              <Button 
-                variant="contained" 
-                sx={{ mt: 2 }}
-                onClick={() => navigate('/')}
-              >
-                Back to Home
-              </Button>
-            </Stack>
-          ) : (
-            <Stack
-              sx={{ justifyContent: 'center', alignItems: 'center', mb: '2rem', rowGap: '2rem' }}
-            >
-              <Stack
-                width={is480 ? 'auto' : is1420 ? 'auto' : '88rem'}
-                p={is480 ? 2 : 0}
-                height={is840 ? 'auto' : '50rem'}
-                rowGap={5}
-                mt={is840 ? 0 : 5}
-                justifyContent={'center'}
-                mb={5}
-                flexDirection={is840 ? 'column' : 'row'}
-                columnGap={is990 ? '2rem' : '5rem'}
-              >
-                {/* Left Stack (Images) */}
-                <Stack
-                  sx={{ flexDirection: 'row', columnGap: '2.5rem', alignSelf: 'flex-start', height: '100%' }}
-                >
-                  {/* Image Selection */}
-                  {!is1420 && (
-                    <Stack sx={{ display: 'flex', rowGap: '1.5rem', height: '100%', overflowY: 'scroll' }}>
-                      {product &&
-                        product.images.map((image, index) => (
-                          <motion.div
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 1 }}
-                            style={{ width: '200px', cursor: 'pointer' }}
-                            onClick={() => setSelectedImageIndex(index)}
-                            key={index}
-                          >
-                            <img
-                              style={{ width: '100%', objectFit: 'contain' }}
-                              src={image}
-                              alt={`${product.title} image`}
-                            />
-                          </motion.div>
-                        ))}
-                    </Stack>
+    <Box sx={{
+      bgcolor: '#f9f9f9',
+      minHeight: '100vh',
+      py: 6,
+      px: { xs: 2, sm: 4, md: 6 }
+    }}>
+      {/* Loading State */}
+      {productFetchStatus === 'pending' && (
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '80vh'
+        }}>
+          <CircularProgress size={80} thickness={4} sx={{ color: 'primary.main' }} />
+        </Box>
+      )}
+
+      {/* Product Content */}
+      {product && (
+        <Box sx={{
+          maxWidth: '1400px',
+          margin: '0 auto',
+          bgcolor: 'white',
+          borderRadius: 4,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+          overflow: 'hidden'
+        }}>
+          <Grid container>
+            {/* Image Gallery */}
+            <Grid item xs={12} md={6} sx={{
+              p: 4,
+              borderRight: { md: '1px solid #eee' }
+            }}>
+              <Box sx={{
+                position: 'relative',
+                borderRadius: 3,
+                overflow: 'hidden',
+                bgcolor: '#f5f5f5',
+                aspectRatio: '1/1',
+                mb: 3
+              }}>
+                <img
+                  src={product.images[selectedImageIndex]}
+                  alt={product.title}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                    mixBlendMode: 'multiply'
+                  }}
+                />
+              </Box>
+
+              {/* Image Thumbnails */}
+              <Stack direction="row" spacing={2} sx={{
+                overflowX: 'auto',
+                pb: 1,
+                '&::-webkit-scrollbar': { height: '6px' },
+                '&::-webkit-scrollbar-thumb': {
+                  bgcolor: 'primary.main',
+                  borderRadius: 3
+                }
+              }}>
+                {product.images.map((img, index) => (
+                  <motion.div
+                    key={index}
+                    whileHover={{ scale: 1.05 }}
+                    onClick={() => setSelectedImageIndex(index)}
+                    style={{
+                      flexShrink: 0,
+                      cursor: 'pointer',
+                      border: `2px solid ${selectedImageIndex === index ? theme.palette.primary.main : '#eee'}`,
+                      borderRadius: 8,
+                      overflow: 'hidden',
+                      width: 80,
+                      height: 80
+                    }}
+                  >
+                    <img
+                      src={img}
+                      alt={`Variant ${index + 1}`}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  </motion.div>
+                ))}
+              </Stack>
+            </Grid>
+
+            {/* Product Details */}
+            <Grid item xs={12} md={6} sx={{ p: 4 }}>
+              {/* Title & Rating */}
+              <Typography variant="h3" sx={{
+                fontWeight: 700,
+                mb: 1,
+                color: 'text.primary',
+                fontSize: { xs: '2rem', md: '2.5rem' }
+              }}>
+                {product.title}
+              </Typography>
+              
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 3 }}>
+                <Rating 
+                  value={averageRating} 
+                  precision={0.5} 
+                  readOnly 
+                  sx={{ color: '#ffb400' }} 
+                />
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                  ({totalReviews} {totalReviews === 1 ? 'review' : 'reviews'})
+                </Typography>
+                <Chip 
+                  label={product.stockQuantity > 0 ? 'In Stock' : 'Out of Stock'} 
+                  sx={{ 
+                    bgcolor: product.stockQuantity > 0 ? '#e8f5e9' : '#ffebee',
+                    color: product.stockQuantity > 0 ? '#2e7d32' : '#c62828',
+                    fontWeight: 500
+                  }} 
+                />
+              </Stack>
+
+              {/* Pricing */}
+              <Box sx={{ mb: 4 }}>
+                {product.discountAmount > 0 && (
+                  <Typography variant="h5" sx={{ 
+                    color: 'text.secondary',
+                    textDecoration: 'line-through',
+                    mb: 0.5
+                  }}>
+                    {formatPrice(product.price)}
+                  </Typography>
+                )}
+                <Stack direction="row" alignItems="baseline" spacing={2}>
+                  <Typography variant="h2" sx={{ 
+                    fontWeight: 800,
+                    color: 'primary.main',
+                    fontSize: { xs: '2.5rem', md: '3rem' }
+                  }}>
+                    {formatPrice(product.price - product.discountAmount)}
+                  </Typography>
+                  {product.discountAmount > 0 && (
+                    <Chip 
+                      label={`Save ${formatPrice(product.discountAmount)}`} 
+                      sx={{ 
+                        bgcolor: '#fff3e0', 
+                        color: '#ef6c00',
+                        fontWeight: 600,
+                        fontSize: '0.9rem'
+                      }} 
+                    />
                   )}
-
-                  {/* Selected Image */}
-                  <Stack mt={is480 ? '0rem' : '5rem'}>
-                    {is1420 ? (
-                      <Stack width={is480 ? '100%' : is990 ? '400px' : '500px'}>
-                        <AutoPlaySwipeableViews
-                          axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
-                          index={activeStep}
-                          onChangeIndex={handleStepChange}
-                          enableMouseEvents
-                        >
-                          {product?.images.map((image, index) => (
-                            <div key={index} style={{ width: '100%', height: '100%' }}>
-                              {Math.abs(activeStep - index) <= 2 ? (
-                                <Box
-                                  component="img"
-                                  sx={{ width: '100%', objectFit: 'contain', overflow: 'hidden', aspectRatio: 1 / 1 }}
-                                  src={image}
-                                  alt={product?.title}
-                                />
-                              ) : null}
-                            </div>
-                          ))}
-                        </AutoPlaySwipeableViews>
-
-                        <MobileStepper
-                          steps={maxSteps}
-                          position="static"
-                          activeStep={activeStep}
-                          nextButton={
-                            <Button
-                              size="small"
-                              onClick={handleNext}
-                              disabled={activeStep === maxSteps - 1}
-                            >
-                              {theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
-                              Next
-                            </Button>
-                          }
-                          backButton={
-                            <Button size="small" onClick={handleBack} disabled={activeStep === 0}>
-                              {theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
-                              Back
-                            </Button>
-                          }
-                        />
-                      </Stack>
-                    ) : (
-                      <div style={{ width: '100%' }}>
-                        <img
-                          style={{ width: '100%', objectFit: 'contain', aspectRatio: 1 / 1 }}
-                          src={product?.images?.[selectedImageIndex] || ''}
-                          alt={product?.title || 'Product image'}
-                        />
-                      </div>
-                    )}
-                  </Stack>
                 </Stack>
+              </Box>
 
-                {/* Right Stack - About Product */}
-                <Stack rowGap={'1.5rem'} width={is480 ? '100%' : '25rem'}>
-                  {/* Title, Rating, Price */}
-                  <Stack rowGap={'.5rem'}>
-                    <Typography variant="h4" fontWeight={600}>
-                      {product?.title}
-                    </Typography>
-                    <Stack
-                      sx={{
-                        flexDirection: 'row',
-                        columnGap: is340 ? '.5rem' : '1rem',
-                        alignItems: 'center',
-                        flexWrap: 'wrap',
-                        rowGap: '1rem',
+              {/* Description */}
+              <Typography variant="body1" sx={{ 
+                color: 'text.secondary', 
+                lineHeight: 1.6,
+                mb: 4
+              }}>
+                {product.description}
+              </Typography>
+
+              {/* Customization */}
+              {product.customizable && (
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={3}
+                  label="Customization Details"
+                  value={customization}
+                  onChange={(e) => setCustomization(e.target.value)}
+                  sx={{ mb: 4 }}
+                />
+              )}
+
+              {/* Color Selection */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="h6" sx={{ 
+                  mb: 2, 
+                  fontWeight: 600,
+                  color: 'text.primary'
+                }}>
+                  Select Color
+                </Typography>
+                <Stack direction="row" spacing={1.5}>
+                  {COLORS.map((color, index) => (
+                    <motion.div 
+                      key={index}
+                      whileHover={{ scale: 1.05 }}
+                      onClick={() => setSelectedColorIndex(index)}
+                      style={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: '50%',
+                        cursor: 'pointer',
+                        border: `3px solid ${selectedColorIndex === index ? theme.palette.primary.main : 'transparent'}`,
+                        padding: 2,
+                        transition: 'all 0.2s ease'
                       }}
                     >
-                      <Rating 
-                        value={Number(averageRating) || 0} 
-                        readOnly 
-                        precision={0.5}
-                      />
-                      <Typography>
-                        ({totalReviews === 0 ? 'No reviews' : totalReviews === 1 ? `${totalReviews} Review` : `${totalReviews} Reviews`})
-                      </Typography>
-                      <Typography
-                        color={
-                          product?.stockQuantity <= 10
-                            ? 'error'
-                            : product?.stockQuantity <= 20
-                            ? 'orange'
-                            : 'green'
+                      <Box sx={{
+                        width: '100%',
+                        height: '100%',
+                        borderRadius: '50%',
+                        bgcolor: color,
+                        border: color === '#F6F6F6' ? '1px solid #ddd' : 'none',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                      }} />
+                    </motion.div>
+                  ))}
+                </Stack>
+              </Box>
+
+              {/* Size Selection */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="h6" sx={{ 
+                  mb: 2, 
+                  fontWeight: 600,
+                  color: 'text.primary'
+                }}>
+                  Select Size
+                </Typography>
+                <Stack direction="row" spacing={1} flexWrap="wrap">
+                  {SIZES.map((size) => (
+                    <motion.button
+                      key={size}
+                      whileHover={{ scale: 1.05 }}
+                      onClick={() => handleSizeSelect(size)}
+                      style={{
+                        minWidth: 48,
+                        height: 48,
+                        borderRadius: 8,
+                        border: 'none',
+                        cursor: 'pointer',
+                        background: selectedSize === size ? theme.palette.primary.main : '#f5f5f5',
+                        color: selectedSize === size ? 'white' : 'inherit',
+                        fontWeight: 600,
+                        margin: 4,
+                        fontSize: '1rem',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      {size}
+                    </motion.button>
+                  ))}
+                </Stack>
+              </Box>
+
+              {/* Quantity & Actions */}
+              <Box sx={{ mb: 4 }}>
+                <Stack direction="row" spacing={3} alignItems="center">
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <IconButton
+                      onClick={handleDecreaseQty}
+                      sx={{ 
+                        border: '1px solid #ddd',
+                        borderRadius: 2,
+                        '&:hover': { 
+                          bgcolor: 'primary.light',
+                          color: 'primary.main'
                         }
-                      >
-                        {product?.stockQuantity <= 10
-                          ? `Only ${product?.stockQuantity} left`
-                          : product?.stockQuantity <= 20
-                          ? 'Only few left'
-                          : 'In Stock'}
+                      }}
+                    >
+                      <Remove />
+                    </IconButton>
+                    <Typography variant="h6" sx={{ 
+                      minWidth: 40, 
+                      textAlign: 'center',
+                      fontWeight: 600
+                    }}>
+                      {quantity}
+                    </Typography>
+                    <IconButton
+                      onClick={handleIncreaseQty}
+                      sx={{ 
+                        bgcolor: 'primary.main',
+                        color: 'white',
+                        '&:hover': { 
+                          bgcolor: 'primary.dark',
+                          transform: 'scale(1.05)'
+                        },
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <Add />
+                    </IconButton>
+                  </Stack>
+
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    size="large"
+                    onClick={handleAddToCart}
+                    disabled={isProductAlreadyInCart}
+                    sx={{
+                      height: 48,
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      fontSize: 16,
+                      fontWeight: 600,
+                      bgcolor: isProductAlreadyInCart ? '#e0e0e0' : 'primary.main',
+                      color: isProductAlreadyInCart ? 'text.secondary' : 'white',
+                      '&:hover': {
+                        bgcolor: isProductAlreadyInCart ? '#e0e0e0' : 'primary.dark',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                      },
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    {isProductAlreadyInCart ? 'Added to Cart' : 'Add to Cart'}
+                  </Button>
+
+                  <IconButton
+                    onClick={() => handleAddRemoveFromWishlist({ target: { checked: !isProductAlreadyinWishlist } })}
+                    sx={{
+                      border: '1px solid #ddd',
+                      borderRadius: 2,
+                      color: isProductAlreadyinWishlist ? '#e53935' : 'inherit',
+                      '&:hover': {
+                        bgcolor: isProductAlreadyinWishlist ? '#ffebee' : '#f5f5f5',
+                        transform: 'scale(1.1)'
+                      },
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    {isProductAlreadyinWishlist ? <Favorite /> : <FavoriteBorder />}
+                  </IconButton>
+                </Stack>
+              </Box>
+
+              {/* Product Features */}
+              <Box sx={{ 
+                bgcolor: '#f8f9fa',
+                borderRadius: 3,
+                p: 3,
+                mb: 4
+              }}>
+                <Stack spacing={2}>
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <LocalShippingOutlinedIcon sx={{ 
+                      color: 'primary.main', 
+                      fontSize: 32 
+                    }} />
+                    <Box>
+                      <Typography variant="subtitle1" fontWeight={600}>
+                        Free Shipping
                       </Typography>
-                    </Stack>
-                    <Stack>
-                      <Stack>
-                        {product.discountAmount > 0 && (
-                          <Typography
-                            sx={{
-                              fontWeight: 600,
-                              fontSize: '1rem',
-                              color: 'green', // Or any color you prefer for discounts
-                              textAlign: 'center',
-                              flex: 1
-                            }}
-                          >
-                            Discount: {formatPrice(product.discountAmount)}
-                          </Typography>
-                        )}
-                        <Typography variant="h6" style={{ textDecoration: 'line-through', color: 'gray' }}>
-                          Price: {formatPrice(product.price)}
-                        </Typography>
-                        <Typography
-                          sx={{
-                            fontWeight: 600,
-                            fontSize: '1.2rem',
-                            color: 'primary.main',
-                            textAlign: 'center',
-                            flex: 1
-                          }}
-                        >
-                          Price: {formatPrice(parseFloat(product.price) - parseFloat(product.discountAmount) || 0)}
-                        </Typography>
-                      </Stack>
-                    </Stack>
+                      <Typography variant="body2" color="text.secondary">
+                        Arrives in 3-5 business days
+                      </Typography>
+                    </Box>
                   </Stack>
-
-                  {/* Description */}
-                  <Stack rowGap={'.8rem'}>
-                    <Typography>{product?.description}</Typography>
-                    <hr />
-                  </Stack>
-
-                  {/* Color, Size, and Add-to-Cart */}
-                  {!loggedInUser?.isAdmin && (
-                    <Stack sx={{ rowGap: '1.3rem' }} width={'fit-content'}>
-                      {/* Colors */}
-                      <Stack flexDirection={'row'} alignItems={'center'} columnGap={is387 ? '5px' : '1rem'} width={'fit-content'}>
-                        <Typography>Colors: </Typography>
-                        <Stack flexDirection={'row'} columnGap={is387 ? '.5rem' : '.2rem'}>
-                          {COLORS.map((color, index) => (
-                            <div
-                              style={{
-                                backgroundColor: 'white',
-                                border: selectedColorIndex === index ? `1px solid ${theme.palette.primary.dark}` : '',
-                                width: is340 ? '40px' : '50px',
-                                height: is340 ? '40px' : '50px',
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                borderRadius: '100%',
-                              }}
-                              onClick={() => setSelectedColorIndex(index)}
-                              key={index}
-                            >
-                              <div
-                                style={{
-                                  width: '40px',
-                                  height: '40px',
-                                  border: color === '#F6F6F6' ? '1px solid grayText' : '',
-                                  backgroundColor: color,
-                                  borderRadius: '100%',
-                                }}
-                              ></div>
-                            </div>
-                          ))}
-                        </Stack>
-                      </Stack>
-
-                      {/* Size */}
-                      <Stack flexDirection={'row'} alignItems={'center'} columnGap={is387 ? '5px' : '1rem'} width={'fit-content'}>
-                        <Typography>Size: </Typography>
-                        <Stack flexDirection={'row'} columnGap={is387 ? '.5rem' : '1rem'}>
-                          {SIZES.map((size) => (
-                            <motion.div
-                              onClick={() => handleSizeSelect(size)}
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 1 }}
-                              style={{
-                                border: selectedSize === size ? '' : '1px solid grayText',
-                                borderRadius: '8px',
-                                width: '30px',
-                                height: '30px',
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                cursor: 'pointer',
-                                padding: '1.2rem',
-                                backgroundColor: selectedSize === size ? '#DB4444' : 'whitesmoke',
-                                color: selectedSize === size ? 'white' : '',
-                              }}
-                              key={size}
-                            >
-                              <p>{size}</p>
-                            </motion.div>
-                          ))}
-                        </Stack>
-                      </Stack>
-
-                      {/* Quantity, Add to Cart, and Wishlist */}
-                      <Stack flexDirection={'row'} columnGap={is387 ? '.3rem' : '1.5rem'} width={'100%'}>
-                        {/* Quantity */}
-                        <Stack flexDirection={'row'} alignItems={'center'} justifyContent={'space-between'}>
-                          <MotionConfig whileHover={{ scale: 1.05 }} whileTap={{ scale: 1 }}>
-                            <motion.button
-                              onClick={handleDecreaseQty}
-                              style={{
-                                padding: '10px 15px',
-                                fontSize: '1.05rem',
-                                backgroundColor: '',
-                                color: 'black',
-                                outline: 'none',
-                                border: '1px solid black',
-                                borderRadius: '8px',
-                              }}
-                            >
-                              -
-                            </motion.button>
-                            <p style={{ margin: '0 1rem', fontSize: '1.1rem', fontWeight: '400' }}>{quantity}</p>
-                            <motion.button
-                              onClick={handleIncreaseQty}
-                              style={{
-                                padding: '10px 15px',
-                                fontSize: '1.05rem',
-                                backgroundColor: 'black',
-                                color: 'white',
-                                outline: 'none',
-                                border: 'none',
-                                borderRadius: '8px',
-                              }}
-                            >
-                              +
-                            </motion.button>
-                          </MotionConfig>
-                        </Stack>
-
-                        {/* Add to Cart */}
-                        {isProductAlreadyInCart ? (
-                          <button
-                            style={{
-                              padding: '10px 15px',
-                              fontSize: '1.05rem',
-                              backgroundColor: 'black',
-                              color: 'white',
-                              outline: 'none',
-                              border: 'none',
-                              borderRadius: '8px',
-                            }}
-                            onClick={() => navigate('/cart')}
-                          >
-                            In Cart
-                          </button>
-                        ) : (
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 1 }}
-                            onClick={handleAddToCart}
-                            style={{
-                              padding: '10px 15px',
-                              fontSize: '1.05rem',
-                              backgroundColor: 'black',
-                              color: 'white',
-                              outline: 'none',
-                              border: 'none',
-                              borderRadius: '8px',
-                            }}
-                          >
-                            Add To Cart
-                          </motion.button>
-                        )}
-
-                        {/* Wishlist */}
-                        <motion.div
-                          style={{
-                            border: '1px solid grayText',
-                            borderRadius: '4px',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                          }}
-                        >
-                          <Checkbox
-                            checked={isProductAlreadyinWishlist}
-                            onChange={(e) => handleAddRemoveFromWishlist(e)}
-                            icon={<FavoriteBorder />}
-                            checkedIcon={<Favorite sx={{ color: 'red' }} />}
-                          />
-                        </motion.div>
-                      </Stack>
-                    </Stack>
-                  )}
-
-                  {/* Customization Input */}
-                  {product?.customizable && (
-                    <Stack>
-                      <Typography>Customize Your Product:</Typography>
-                      <TextField
-                        placeholder="Enter customization details"
-                        value={customization}
-                        onChange={(e) => setCustomization(e.target.value)}
-                        fullWidth
-                      />
-                    </Stack>
-                  )}
-
-                  {/* Product Perks */}
-                  <Stack mt={3} sx={{ justifyContent: 'center', alignItems: 'center', border: '1px grayText solid', borderRadius: '7px' }}>
-                    <Stack p={2} flexDirection={'row'} alignItems={'center'} columnGap={'1rem'} width={'100%'} justifyContent={'flex-start'}>
-                      <Box>
-                        <LocalShippingOutlinedIcon />
-                        <Typography>Free Delivery</Typography>
-                      </Box>
-                      <Stack>
-                        <Typography>Enter your postal for delivery availability</Typography>
-                      </Stack>
-                    </Stack>
-                    <hr style={{ width: '100%' }} />
-                    <Stack p={2} flexDirection={'row'} alignItems={'center'} width={'100%'} columnGap={'1rem'} justifyContent={'flex-start'}>
-                      <Box>
-                        <CachedOutlinedIcon />
-                        <Typography>Return Delivery</Typography>
-                      </Box>
-                      <Stack>
-                        <Typography>Free 30 Days Delivery Returns</Typography>
-                      </Stack>
-                    </Stack>
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <CachedOutlinedIcon sx={{ 
+                      color: 'primary.main', 
+                      fontSize: 32 
+                    }} />
+                    <Box>
+                      <Typography variant="subtitle1" fontWeight={600}>
+                        Easy Returns
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        07-day free returns policy
+                      </Typography>
+                    </Box>
                   </Stack>
                 </Stack>
-              </Stack>
+              </Box>
+            </Grid>
+          </Grid>
 
-              {/* Reviews */}
-              <Stack width={is1420 ? 'auto' : '88rem'} p={is480 ? 2 : 0}>
-                <Reviews productId={id} averageRating={averageRating} />
-              </Stack>
-            </Stack>
-          )}
-        </Stack>
+          {/* Reviews Section */}
+          <Box sx={{ 
+            bgcolor: '#f9f9f9',
+            p: 4,
+            borderTop: '1px solid #eee'
+          }}>
+            <Typography variant="h4" sx={{ 
+              fontWeight: 700,
+              mb: 4,
+              color: 'text.primary'
+            }}>
+              Customer Reviews
+            </Typography>
+            <Reviews productId={id} averageRating={averageRating} />
+          </Box>
+        </Box>
       )}
-    </>
+    </Box>
   );
 };
 

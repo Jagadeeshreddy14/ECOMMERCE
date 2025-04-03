@@ -247,13 +247,40 @@ export const AddProduct = () => {
 
                 </Stack>
 
-                <Stack flexDirection={'row'} spacing={2}>
-                    <Typography variant="h6" fontWeight={500}>Customizable</Typography>
-                    <Checkbox
-                        {...register("customizable")}
-                        defaultChecked={false}
-                    />
+                <Stack flexDirection={'row'} spacing={4}>
+                    <Stack flexDirection={'row'} spacing={2} alignItems="center">
+                        <Typography variant="h6" fontWeight={500}>Customizable</Typography>
+                        <Checkbox
+                            {...register("customizable")}
+                            defaultChecked={false}
+                        />
+                    </Stack>
+                    <Stack flexDirection={'row'} spacing={2} alignItems="center">
+                        <Typography variant="h6" fontWeight={500}>Is Rental</Typography>
+                        <Checkbox 
+                            {...register("isRental")}
+                            defaultChecked={false}
+                        />
+                    </Stack>
                 </Stack>
+
+                {/* Rental Price Field - Only shown when isRental is checked */}
+                {watch('isRental') && (
+                    <Stack flex={1} spacing={1}>
+                        <Typography variant="h6" fontWeight={500}>Rental Price</Typography>
+                        <TextField
+                            type="number"
+                            {...register("rentalPrice", {
+                                required: "Rental price is required when product is marked as rental",
+                                min: { value: 0, message: "Rental price must be positive" }
+                            })}
+                            error={!!errors.rentalPrice}
+                            helperText={errors.rentalPrice?.message}
+                            variant="outlined"
+                            fullWidth
+                        />
+                    </Stack>
+                )}
 
                 <Stack>
                     <Typography variant='h6' fontWeight={400}  gutterBottom>Description</Typography>

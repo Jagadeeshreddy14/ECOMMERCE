@@ -1,18 +1,16 @@
-import { FormHelperText, Paper, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Card, CardContent, CardMedia, Checkbox, Stack, Typography, FormHelperText, useMediaQuery, useTheme } from '@mui/material';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
 import Favorite from '@mui/icons-material/Favorite';
-import Checkbox from '@mui/material/Checkbox';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectWishlistItems } from '../../wishlist/WishlistSlice';
 import { selectLoggedInUser } from '../../auth/AuthSlice';
 import { addToCartAsync, selectCartItems } from '../../cart/CartSlice';
 import { motion } from 'framer-motion';
 import { formatPrice } from '../../../utils/formatPrice';
-import { Card, CardContent, CardMedia } from '@mui/material';
 
-export const ProductCard = ({
+export default function ProductCard({
   id,
   title,
   price,
@@ -24,18 +22,17 @@ export const ProductCard = ({
   isWishlistCard = false,
   isAdminCard = false,
   onClick,
-  discountAmount = 0 // Add discountAmount as a prop with a default value of 0
-}) => {
-  // Move useState to the top, before any conditionals
+  discountAmount = 0
+}) {
   const [imgError, setImgError] = useState(false);
-  
   const navigate = useNavigate();
   const wishlistItems = useSelector(selectWishlistItems) || [];
   const loggedInUser = useSelector(selectLoggedInUser);
   const cartItems = useSelector(selectCartItems) || [];
   const dispatch = useDispatch();
-
   const theme = useTheme();
+
+  // Media queries
   const is1410 = useMediaQuery(theme.breakpoints.down(1410));
   const is932 = useMediaQuery(theme.breakpoints.down(932));
   const is752 = useMediaQuery(theme.breakpoints.down(752));
@@ -44,18 +41,15 @@ export const ProductCard = ({
   const is488 = useMediaQuery(theme.breakpoints.down(488));
   const is408 = useMediaQuery(theme.breakpoints.down(408));
 
-  // Validate the ID prop after hooks
   if (!id) {
     console.error('Product ID is missing');
     return null;
   }
 
-  // Check if the product is already in the wishlist
   const isProductAlreadyInWishlist = wishlistItems.some(
     (item) => item?.product?._id === id
   );
 
-  // Check if the product is already in the cart
   const isProductAlreadyInCart = cartItems.some(
     (item) => item?.product?._id === id
   );
@@ -66,11 +60,8 @@ export const ProductCard = ({
     dispatch(addToCartAsync(data));
   };
 
-  // Update the handleBuyNow function
   const handleBuyNow = (e) => {
-    e.stopPropagation(); // Prevent event bubbling
-    
-    // Navigate to checkout with product details
+    e.stopPropagation();
     navigate('/checkout', { 
       state: { 
         buyNowItem: {
@@ -87,17 +78,9 @@ export const ProductCard = ({
     });
   };
 
-  // Fallback image URL
   const fallbackImage = "https://via.placeholder.com/300x300?text=No+Image";
-  
-  // Function to handle image load errors
-  const handleImageError = () => {
-    setImgError(true);
-  };
-
-  // Get primary image - try thumbnail first, then first image from array
+  const handleImageError = () => setImgError(true);
   const displayImage = thumbnail || (images && images[0]) || fallbackImage;
-
   const discountedPrice = price - discountAmount;
 
   return (
@@ -106,52 +89,69 @@ export const ProductCard = ({
         width: '100%', 
         maxWidth: 345,
         borderRadius: '16px',
-        transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-        backgroundColor: '#ffffff',  // Base background color
+        transition: 'all 0.3s ease',
+        background: 'linear-gradient(145deg, #ffffff, #f8f9fa)',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+        border: '1px solid rgba(0,0,0,0.05)',
+        overflow: 'hidden',
         '&:hover': {
-          transform: 'translateY(-5px)',
-          boxShadow: '0 8px 16px rgba(0,0,0,0.1)',
-          backgroundColor: '#fafafa',  // Slight color change on hover
+          transform: 'translateY(-8px)',
+          boxShadow: '0 12px 24px rgba(102, 126, 234, 0.15)',
         }
       }}
     >
-      <CardMedia
-        component="img"
-        height="250"
-        image={imgError ? fallbackImage : displayImage}
-        alt={title}
-        onError={handleImageError}
-        onClick={onClick}
-        sx={{
-          objectFit: 'contain',
-          p: 2,
-          bgcolor: '#f8f9fa',  // Light gray background for image area
-          cursor: 'pointer',
-          transition: 'transform 0.3s ease',
-          '&:hover': {
-            transform: 'scale(1.05)',
-          }
-        }}
-      />
-      <CardContent 
-        sx={{ 
-          p: 2,
-          backgroundColor: 'transparent',  // Transparent to show card background
-        }}
-      >
+      {/* Product Image with Gradient Overlay */}
+      <Box sx={{ position: 'relative' }}>
+        <CardMedia
+          component="img"
+          height="250"
+          image={imgError ? fallbackImage : displayImage}
+          alt={title}
+          onError={handleImageError}
+          onClick={onClick}
+          sx={{
+            objectFit: 'contain',
+            p: 2,
+            bgcolor: '#f5f7fa',
+            cursor: 'pointer',
+            transition: 'transform 0.4s ease',
+            '&:hover': {
+              transform: 'scale(1.05)',
+            }
+          }}
+        />
+        {discountAmount > 0 && (
+          <Box sx={{
+            position: 'absolute',
+            top: 16,
+            right: 16,
+            bgcolor: 'error.main',
+            color: 'white',
+            px: 1.5,
+            py: 0.5,
+            borderRadius: '12px',
+            fontSize: '0.75rem',
+            fontWeight: 'bold',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+            zIndex: 1
+          }}>
+            {Math.round((discountAmount/price)*100)}% OFF
+          </Box>
+        )}
+      </Box>
+
+      <CardContent sx={{ p: 3 }}>
         <Stack spacing={2}>
-          <Stack 
-            direction="row" 
-            alignItems="center" 
-            justifyContent="space-between"
-            sx={{ minHeight: '60px' }}
-          >
-            <Stack spacing={0.5}>
+          {/* Title and Wishlist Button */}
+          <Stack direction="row" alignItems="flex-start" justifyContent="space-between">
+            <Stack spacing={0.5} sx={{ flex: 1 }}>
               <Typography 
                 variant="h6" 
                 sx={{
-                  fontWeight: 500,
+                  fontWeight: 600,
                   fontSize: '1.1rem',
+                  lineHeight: 1.3,
+                  color: '#2d3748',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   display: '-webkit-box',
@@ -162,15 +162,17 @@ export const ProductCard = ({
                 {title}
               </Typography>
               <Typography 
-                color="text.secondary"
+                variant="body2"
                 sx={{ 
-                  fontSize: '0.9rem',
-                  fontWeight: 400 
+                  color: '#718096',
+                  fontWeight: 500,
+                  fontSize: '0.9rem'
                 }}
               >
                 {brand}
               </Typography>
             </Stack>
+            
             {!isAdminCard && (
               <motion.div
                 whileHover={{ scale: 1.2 }}
@@ -181,92 +183,95 @@ export const ProductCard = ({
                   onClick={(e) => e.stopPropagation()}
                   checked={isProductAlreadyInWishlist}
                   onChange={(e) => handleAddRemoveFromWishlist(e, id)}
-                  icon={<FavoriteBorder sx={{ color: '#666' }} />}
-                  checkedIcon={<Favorite sx={{ color: '#ff3d47' }} />}
+                  icon={<FavoriteBorder sx={{ color: '#a0aec0' }} />}
+                  checkedIcon={<Favorite sx={{ 
+                    color: '#ff3d47',
+                    filter: 'drop-shadow(0 2px 4px rgba(255, 61, 71, 0.3))'
+                  }} />}
+                  sx={{
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 61, 71, 0.08)'
+                    }
+                  }}
                 />
               </motion.div>
             )}
           </Stack>
 
-          <Stack 
-            direction="row" 
-            justifyContent="space-between" 
-            alignItems="center"
-            spacing={2}
-          >
-            {!isWishlistCard && !isProductAlreadyInCart && !isAdminCard && (
-              <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={(e) => handleAddToCart(e)}
-                style={{
-                  padding: '8px 15px',
-                  borderRadius: '25px',
-                  outline: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  backgroundColor: '#1a1a1a',
-                  color: 'white',
-                  fontSize: '0.9rem',
-                  fontWeight: 500,
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                  transition: 'background-color 0.3s ease',
-                  flex: 1
-                }}
-              >
-                Add To Cart
-              </motion.button>
-            )}
-            
+          {/* Price Section */}
+          <Stack direction="row" alignItems="center" spacing={1}>
             {discountAmount > 0 && (
               <Typography
                 sx={{
                   fontWeight: 500,
                   fontSize: '0.9rem',
-                  color: 'green',
-                  textAlign: 'center',
-                  flex: 1,
+                  color: '#a0aec0',
                   textDecoration: 'line-through',
                 }}
               >
                 {formatPrice(price)}
               </Typography>
             )}
-
             <Typography 
+              variant="h5"
               sx={{ 
-                fontWeight: 600,
-                fontSize: '1.2rem',
-                color: 'primary.main',
-                textAlign: 'center',
-                flex: 1
+                fontWeight: 700,
+                color: '#4a5568',
+                background: discountAmount > 0 ? 'linear-gradient(135deg, #667eea, #764ba2)' : 'none',
+                WebkitBackgroundClip: discountAmount > 0 ? 'text' : 'none',
+                WebkitTextFillColor: discountAmount > 0 ? 'transparent' : 'none',
               }}
             >
               {formatPrice(discountedPrice)}
             </Typography>
+          </Stack>
 
+          {/* Action Buttons */}
+          <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
             {!isWishlistCard && !isProductAlreadyInCart && !isAdminCard && (
-              <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={(e) => handleBuyNow(e)}
-                style={{
-                  padding: '8px 15px',
-                  borderRadius: '25px',
-                  outline: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  backgroundColor: '#ff3d47',
-                  color: 'white',
-                  fontSize: '0.9rem',
-                  fontWeight: 500,
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                  transition: 'background-color 0.3s ease',
-                  flex: 1
-                }}
-              >
-                Buy Now
-              </motion.button>
+              <>
+                <motion.button
+                  whileHover={{ scale: 1.03, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={(e) => handleAddToCart(e)}
+                  style={{
+                    flex: 1,
+                    padding: '10px 16px',
+                    borderRadius: '12px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    background: 'linear-gradient(135deg, #2d3748, #1a202c)',
+                    color: 'white',
+                    fontSize: '0.9rem',
+                    fontWeight: 600,
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    transition: 'all 0.3s ease',
+                  }}
+                >
+                  Add To Cart
+                </motion.button>
+                
+                <motion.button
+                  whileHover={{ scale: 1.03, boxShadow: '0 4px 12px rgba(255,61,71,0.2)' }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={(e) => handleBuyNow(e)}
+                  style={{
+                    flex: 1,
+                    padding: '10px 16px',
+                    borderRadius: '12px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    background: 'linear-gradient(135deg, #ff3d47, #e53545)',
+                    color: 'white',
+                    fontSize: '0.9rem',
+                    fontWeight: 600,
+                    boxShadow: '0 2px 8px rgba(255,61,71,0.2)',
+                    transition: 'all 0.3s ease',
+                  }}
+                >
+                  Buy Now
+                </motion.button>
+              </>
             )}
 
             {isProductAlreadyInCart && (
@@ -274,29 +279,42 @@ export const ProductCard = ({
                 sx={{ 
                   color: 'success.main',
                   fontSize: '0.9rem',
-                  fontWeight: 500,
-                  textAlign: 'right',
-                  flex: 1
+                  fontWeight: 600,
+                  textAlign: 'center',
+                  width: '100%',
+                  py: 1.5,
+                  borderRadius: '8px',
+                  backgroundColor: 'rgba(72, 187, 120, 0.1)'
                 }}
               >
-                Added to cart
+                ✓ Added to cart
               </Typography>
             )}
           </Stack>
 
+          {/* Stock Quantity Indicator */}
           {stockQuantity <= 20 && (
-            <FormHelperText 
-              sx={{ 
-                fontSize: '0.85rem',
-                color: '#ff3d47',
-                mt: 1 
-              }}
-            >
-              {stockQuantity === 1 ? 'Only 1 item left!' : `Only ${stockQuantity} items left!`}
-            </FormHelperText>
+            <Box sx={{
+              mt: 1,
+              p: 1,
+              borderRadius: '8px',
+              backgroundColor: 'rgba(255, 61, 71, 0.08)',
+              textAlign: 'center'
+            }}>
+              <Typography 
+                variant="caption"
+                sx={{ 
+                  color: '#ff3d47',
+                  fontWeight: 600,
+                  fontSize: '0.8rem'
+                }}
+              >
+                {stockQuantity === 1 ? 'Only 1 item left!' : `Only ${stockQuantity} items left!`}
+              </Typography>
+            </Box>
           )}
         </Stack>
       </CardContent>
     </Card>
   );
-};
+}

@@ -1,17 +1,27 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CartItem } from './CartItem';
-import { Button, Chip, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { 
+    Button, 
+    Chip, 
+    Stack, 
+    Typography, 
+    useMediaQuery, 
+    useTheme, 
+    Box, 
+    Divider,
+    Grid,
+    CircularProgress 
+} from '@mui/material';
 import { resetCartItemRemoveStatus, selectCartItemRemoveStatus, selectCartItems } from '../CartSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { SHIPPING, TAXES } from '../../../constants';
 import { toast } from 'react-toastify';
-import { motion } from 'framer-motion'; // Import motion
+import { motion } from 'framer-motion';
 import { formatPrice } from '../../../utils/formatPrice';
 
 export const Cart = ({ checkout }) => {
     const items = useSelector(selectCartItems);
-    // Calculate subtotal based on discounted price
     const subtotal = items?.reduce((acc, item) => (item?.product?.price - (item?.product?.discountAmount || 0)) * item?.quantity + acc, 0) || 0;
     const totalItems = items?.reduce((acc, item) => acc + item?.quantity, 0) || 0;
     const navigate = useNavigate();
@@ -20,6 +30,7 @@ export const Cart = ({ checkout }) => {
 
     const cartItemRemoveStatus = useSelector(selectCartItemRemoveStatus);
     const dispatch = useDispatch();
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         window.scrollTo({
@@ -48,87 +59,227 @@ export const Cart = ({ checkout }) => {
         };
     }, [dispatch]);
 
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+        }, 1000);
+        return () => clearTimeout(timer);
+    }, []);
+
     return (
-        <Stack justifyContent={'flex-start'} alignItems={'center'} mb={'5rem'}>
-
-            <Stack width={is900 ? 'auto' : '50rem'} mt={'3rem'} paddingLeft={checkout ? 0 : 2} paddingRight={checkout ? 0 : 2} rowGap={4}>
-
-                {/* cart items */}
-                <Stack rowGap={2}>
-                    {items?.map((item) => (
-                        <CartItem
-                            key={item._id}
-                            id={item._id}
-                            title={item.product?.title}
-                            brand={item.product?.brand?.name}
-                            category={item.product?.category?.name}
-                            price={item.product?.price}
-                            discountAmount={item.product?.discountAmount || 0} // Pass discountAmount to CartItem
-                            quantity={item.quantity}
-                            thumbnail={item.product?.thumbnail}
-                            stockQuantity={item.product?.stockQuantity}
-                            productId={item.product?._id}
+        <Box sx={{
+            bgcolor: '#f8f9fa',
+            minHeight: '100vh',
+            py: 6,
+            px: { xs: 2, sm: 4 }
+        }}>
+            <Box sx={{
+                maxWidth: '1200px',
+                margin: '0 auto',
+                bgcolor: 'white',
+                borderRadius: 4,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+                p: 4
+            }}>
+                {isLoading ? (
+                    <Box sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        minHeight: '400px'
+                    }}>
+                        <CircularProgress 
+                            size={60}
+                            thickness={4}
+                            sx={{
+                                color: 'primary.main',
+                                '& .MuiCircularProgress-circle': {
+                                    strokeLinecap: 'round',
+                                }
+                            }}
                         />
-                    ))}
-                </Stack>
+                    </Box>
+                ) : (
+                    <>
+                        <Typography variant="h4" sx={{
+                            fontWeight: 700,
+                            mb: 4,
+                            color: 'text.primary',
+                            borderBottom: '1px solid #eee',
+                            pb: 2
+                        }}>
+                            {checkout ? 'Order Summary' : 'Your Shopping Cart'}
+                        </Typography>
 
-                {/* subtotal */}
-                <Stack flexDirection={'row'} justifyContent={'space-between'} alignItems={'center'}>
+                        {items?.length > 0 ? (
+                            <Grid container spacing={4}>
+                                {/* Cart Items */}
+                                <Grid item xs={12} md={8}>
+                                    <Stack spacing={3}>
+                                        {items?.map((item) => (
+                                            <motion.div
+                                                key={item._id}
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ duration: 0.3 }}
+                                            >
+                                                <CartItem
+                                                    id={item._id}
+                                                    title={item.product?.title}
+                                                    brand={item.product?.brand?.name}
+                                                    category={item.product?.category?.name}
+                                                    price={item.product?.price}
+                                                    discountAmount={item.product?.discountAmount || 0}
+                                                    quantity={item.quantity}
+                                                    thumbnail={item.product?.thumbnail}
+                                                    stockQuantity={item.product?.stockQuantity}
+                                                    productId={item.product?._id}
+                                                />
+                                            </motion.div>
+                                        ))}
+                                    </Stack>
+                                </Grid>
 
-                    {checkout ? (
-                        <Stack rowGap={2} width={'100%'}>
+                                {/* Order Summary */}
+                                <Grid item xs={12} md={4}>
+                                    <Box sx={{
+                                        bgcolor: '#fafafa',
+                                        borderRadius: 3,
+                                        p: 3,
+                                        boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
+                                        border: '1px solid #eee'
+                                    }}>
+                                        <Typography variant="h6" sx={{ 
+                                            fontWeight: 600,
+                                            mb: 3,
+                                            color: 'text.primary'
+                                        }}>
+                                            Order Summary
+                                        </Typography>
 
-                            <Stack flexDirection={'row'} justifyContent={'space-between'}>
-                                <Typography>Subtotal</Typography>
-                                <Typography>{formatPrice(subtotal)}</Typography>
-                            </Stack>
+                                        <Stack spacing={2} sx={{ mb: 3 }}>
+                                            <Stack direction="row" justifyContent="space-between">
+                                                <Typography variant="body1">Subtotal ({totalItems} items)</Typography>
+                                                <Typography variant="body1" fontWeight={500}>
+                                                    {formatPrice(subtotal)}
+                                                </Typography>
+                                            </Stack>
 
-                            <Stack flexDirection={'row'} justifyContent={'space-between'}>
-                                <Typography>Shipping</Typography>
-                                <Typography>{formatPrice(SHIPPING)}</Typography>
-                            </Stack>
+                                            {checkout && (
+                                                <>
+                                                    <Stack direction="row" justifyContent="space-between">
+                                                        <Typography variant="body1">Shipping</Typography>
+                                                        <Typography variant="body1" fontWeight={500}>
+                                                            {formatPrice(SHIPPING)}
+                                                        </Typography>
+                                                    </Stack>
+                                                    <Stack direction="row" justifyContent="space-between">
+                                                        <Typography variant="body1">Taxes</Typography>
+                                                        <Typography variant="body1" fontWeight={500}>
+                                                            {formatPrice(TAXES)}
+                                                        </Typography>
+                                                    </Stack>
+                                                </>
+                                            )}
 
-                            <Stack flexDirection={'row'} justifyContent={'space-between'}>
-                                <Typography>Taxes</Typography>
-                                <Typography>{formatPrice(TAXES)}</Typography>
-                            </Stack>
+                                            <Divider sx={{ my: 1 }} />
 
-                            <hr />
+                                            <Stack direction="row" justifyContent="space-between">
+                                                <Typography variant="body1" fontWeight={600}>
+                                                    {checkout ? 'Total' : 'Estimated Total'}
+                                                </Typography>
+                                                <Typography variant="h6" fontWeight={700} color="primary.main">
+                                                    {formatPrice(checkout ? subtotal + SHIPPING + TAXES : subtotal)}
+                                                </Typography>
+                                            </Stack>
+                                        </Stack>
 
-                            <Stack flexDirection={'row'} justifyContent={'space-between'}>
-                                <Typography>Total</Typography>
-                                <Typography>{formatPrice(subtotal + SHIPPING + TAXES)}</Typography>
-                            </Stack>
-
-                        </Stack>
-                    ) : (
-                        <>
-                            <Stack>
-                                <Typography variant='h6' fontWeight={500}>Subtotal</Typography>
-                                <Typography>Total items in cart {totalItems}</Typography>
-                                <Typography variant='body1' color={'text.secondary'}>Shipping and taxes will be calculated at checkout.</Typography>
-                            </Stack>
-
-                            <Stack>
-                                <Typography variant='h6' fontWeight={500}>{formatPrice(subtotal)}</Typography>
-                            </Stack>
-                        </>
-                    )}
-
-                </Stack>
-
-                {/* checkout or continue shopping */}
-                {!checkout &&
-                    <Stack rowGap={'1rem'}>
-                        <Button variant='contained' component={Link} to='/checkout'>Checkout</Button>
-                        <motion.div style={{ alignSelf: 'center' }} whileHover={{ y: 2 }}>
-                            <Chip sx={{ cursor: "pointer", borderRadius: "8px" }} component={Link} to={'/'} label="or continue shopping" variant='outlined' />
-                        </motion.div>
-                    </Stack>
-                }
-
-            </Stack>
-
-        </Stack>
+                                        {!checkout ? (
+                                            <>
+                                                <Button
+                                                    variant="contained"
+                                                    fullWidth
+                                                    size="large"
+                                                    component={Link}
+                                                    to="/checkout"
+                                                    sx={{
+                                                        py: 1.5,
+                                                        borderRadius: 2,
+                                                        fontWeight: 600,
+                                                        fontSize: '1rem',
+                                                        textTransform: 'none',
+                                                        boxShadow: 'none',
+                                                        '&:hover': {
+                                                            transform: 'translateY(-2px)',
+                                                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                                                        },
+                                                        transition: 'all 0.2s ease'
+                                                    }}
+                                                >
+                                                    Proceed to Checkout
+                                                </Button>
+                                                <Box sx={{ textAlign: 'center', mt: 2 }}>
+                                                    <motion.div whileHover={{ scale: 1.05 }}>
+                                                        <Chip
+                                                            component={Link}
+                                                            to="/"
+                                                            label="Continue Shopping"
+                                                            variant="outlined"
+                                                            sx={{
+                                                                cursor: "pointer",
+                                                                borderRadius: 2,
+                                                                px: 2,
+                                                                '&:hover': {
+                                                                    borderColor: 'primary.main',
+                                                                    color: 'primary.main'
+                                                                }
+                                                            }}
+                                                        />
+                                                    </motion.div>
+                                                </Box>
+                                            </>
+                                        ) : (
+                                            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                                                Shipping and tax calculated at checkout
+                                            </Typography>
+                                        )}
+                                    </Box>
+                                </Grid>
+                            </Grid>
+                        ) : (
+                            <Box sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                py: 8,
+                                textAlign: 'center'
+                            }}>
+                                <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
+                                    Your cart is empty
+                                </Typography>
+                                <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+                                    Start adding some amazing products to your cart!
+                                </Typography>
+                                <Button
+                                    variant="contained"
+                                    component={Link}
+                                    to="/"
+                                    sx={{
+                                        px: 4,
+                                        py: 1.5,
+                                        borderRadius: 2,
+                                        fontWeight: 600,
+                                        fontSize: '1rem'
+                                    }}
+                                >
+                                    Continue Shopping
+                                </Button>
+                            </Box>
+                        )}
+                    </>
+                )}
+            </Box>
+        </Box>
     );
 };

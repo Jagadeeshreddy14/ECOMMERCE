@@ -1,4 +1,4 @@
-import {Box, FormHelperText, Stack, TextField, Typography, useMediaQuery, useTheme, Container, Paper } from '@mui/material'
+import {Box, FormHelperText, Stack, TextField, Typography, useMediaQuery, useTheme, Container, Paper, Button, Divider } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import Lottie from 'lottie-react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -12,6 +12,8 @@ import {MotionConfig, motion} from 'framer-motion'
 import { alpha } from '@mui/material/styles';
 import { GoogleLogin } from '@react-oauth/google';
 import { axiosi } from '../../../config/axios';
+import { PhoneAuth } from './PhoneAuth';
+import { GoogleAuth } from './GoogleAuth';
 
 export const Login = () => {
   const dispatch=useDispatch()
@@ -24,6 +26,7 @@ export const Login = () => {
   const is900=useMediaQuery(theme.breakpoints.down(900))
   const is480=useMediaQuery(theme.breakpoints.down(480))
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [isPhoneAuthOpen, setIsPhoneAuthOpen] = useState(false);
   
   // handles user redirection
   useEffect(()=>{
@@ -60,24 +63,41 @@ export const Login = () => {
     dispatch(loginAsync(cred))
   }
 
-  const handleGoogleLoginSuccess = async (credentialResponse) => {
-    setGoogleLoading(true);
+  const handlePhoneAuthSuccess = async (user) => {
     try {
-      const { credential } = credentialResponse;
+      // Send the phone auth token to the backend
+      const response = await axiosi.post('/auth/phone', { 
+        phoneNumber: user.phoneNumber,
+        uid: user.uid 
+      });
 
-      // Send the Google token to the backend
-      const response = await axiosi.post('/auth/google', { credential });
-
-      // Log user details for debugging
-      console.log('User Details:', response.data.user);
-
-      // Redirect based on user verification status
       if (response.data.user.isVerified) {
-        toast.success('Google Sign-In successful!');
-        navigate("/"); // Redirect to user menu page
+        toast.success('Phone Sign-In successful!');
+        navigate("/");
       } else {
         toast.info('Please verify your account.');
-        navigate('/verify-otp'); // Redirect to OTP verification page
+        navigate('/verify-otp');
+      }
+    } catch (error) {
+      console.error('Phone Sign-In Error:', error);
+      toast.error('Phone Sign-In failed. Please try again.');
+    }
+  };
+
+  const handleGoogleAuthSuccess = async (user) => {
+    setGoogleLoading(true);
+    try {
+      const response = await axiosi.post('/auth/google', { 
+        credential: user.accessToken,
+        uid: user.uid 
+      });
+
+      if (response.data.user.isVerified) {
+        toast.success('Google Sign-In successful!');
+        navigate("/");
+      } else {
+        toast.info('Please verify your account.');
+        navigate('/verify-otp');
       }
     } catch (error) {
       console.error('Google Sign-In Error:', error);
@@ -85,6 +105,10 @@ export const Login = () => {
     } finally {
       setGoogleLoading(false);
     }
+  };
+
+  const handleAuthError = (error) => {
+    toast.error(error.message || 'Authentication failed. Please try again.');
   };
 
   return (
@@ -145,6 +169,35 @@ export const Login = () => {
                 >
                   Sign in to continue to Apex Store
                 </Typography>
+              </Stack>
+
+              <Stack spacing={2}>
+                <GoogleAuth 
+                  onSuccess={handleGoogleAuthSuccess}
+                  onError={handleAuthError}
+                />
+                
+                <Button
+                  variant="outlined"
+                  onClick={() => setIsPhoneAuthOpen(true)}
+                  fullWidth
+                  sx={{
+                    borderColor: '#34b7f1',
+                    color: '#34b7f1',
+                    '&:hover': {
+                      borderColor: '#2a9fd1',
+                      backgroundColor: 'rgba(52, 183, 241, 0.04)'
+                    }
+                  }}
+                >
+                  Sign in with Phone
+                </Button>
+
+                <Divider sx={{ my: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    OR
+                  </Typography>
+                </Divider>
               </Stack>
 
               <Stack 
@@ -243,20 +296,16 @@ export const Login = () => {
                   </Link>
                 </Typography>
               </Stack>
-
-              <Stack spacing={2} alignItems="center">
-                <GoogleLogin
-                  onSuccess={handleGoogleLoginSuccess}
-                  onError={() => {
-                    toast.error('Google Sign-In failed. Please try again.');
-                  }}
-                  disabled={googleLoading}
-                />
-              </Stack>
             </Stack>
           </Paper>
         </Stack>
       </Stack>
+
+      <PhoneAuth
+        open={isPhoneAuthOpen}
+        onClose={() => setIsPhoneAuthOpen(false)}
+        onSuccess={handlePhoneAuthSuccess}
+      />
     </Container>
   )
 }

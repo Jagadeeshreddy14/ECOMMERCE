@@ -29,5 +29,5 @@ export const DASHBOARD_COLORS = {
         dark: '#2563eb',
         contrastText: '#ffffff'
     },
-    chart: ['#3b82f6', '#059669', '#f59e0b', '#dc2626', '#8b5cf6', '#ec4899']
+    chart: ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#9C27B0']
 };

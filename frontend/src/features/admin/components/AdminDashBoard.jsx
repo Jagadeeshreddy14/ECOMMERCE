@@ -10,7 +10,7 @@ import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import { selectCategories } from '../../categories/CategoriesSlice'
-import { ProductCard } from '../../products/components/ProductCard'
+import ProductCard from '../../products/components/ProductCard'  // Change the import statement
 import { deleteProductByIdAsync, fetchProductsAsync, selectProductIsFilterOpen, selectProductTotalResults, selectProducts, toggleFilters, undeleteProductByIdAsync } from '../../products/ProductSlice';
 import { Link } from 'react-router-dom';
 import {motion} from 'framer-motion'

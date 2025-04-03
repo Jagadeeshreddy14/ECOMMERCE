@@ -10,7 +10,6 @@ import MenuItem from '@mui/material/MenuItem';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Badge,
-  Button,
   Chip,
   Stack,
   useMediaQuery,
@@ -29,12 +28,10 @@ import TuneIcon from '@mui/icons-material/Tune';
 import { selectProductIsFilterOpen, toggleFilters } from '../../products/ProductSlice';
 import SearchIcon from '@mui/icons-material/Search';
 
-
 export const Navbar = ({ isProductList = false }) => {
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const [searchQuery, setSearchQuery] = React.useState('');
-  const [placeholder, setPlaceholder] = React.useState(''); // State for animated placeholder
+  const [placeholder, setPlaceholder] = React.useState('');
   const userInfo = useSelector(selectUserInfo);
   const cartItems = useSelector(selectCartItems);
   const loggedInUser = useSelector(selectLoggedInUser);
@@ -45,8 +42,6 @@ export const Navbar = ({ isProductList = false }) => {
   const wishlistItems = useSelector(selectWishlistItems);
   const isProductFilterOpen = useSelector(selectProductIsFilterOpen);
   
-
-  // List of example product names for the placeholder animation
   const exampleProducts = [
     'Search for Handmade products...',
     'Search for Handmade candles...',
@@ -54,18 +49,15 @@ export const Navbar = ({ isProductList = false }) => {
     'Search for artisanal jewelry...',
   ];
 
-  // Index to track the current example product
   const [currentProductIndex, setCurrentProductIndex] = React.useState(0);
 
-  // Effect to cycle through example product names
   React.useEffect(() => {
     const interval = setInterval(() => {
       setCurrentProductIndex((prevIndex) => (prevIndex + 1) % exampleProducts.length);
-    }, 3000); // Change placeholder every 3 seconds
-    return () => clearInterval(interval); // Cleanup interval on unmount
+    }, 3000);
+    return () => clearInterval(interval);
   }, []);
 
-  // Effect to update the placeholder text with a typewriter effect
   React.useEffect(() => {
     let currentText = '';
     let currentCharIndex = 0;
@@ -78,8 +70,8 @@ export const Navbar = ({ isProductList = false }) => {
       } else {
         clearInterval(typewriterInterval);
       }
-    }, 50); // Speed of typing effect
-    return () => clearInterval(typewriterInterval); // Cleanup on unmount or change
+    }, 50);
+    return () => clearInterval(typewriterInterval);
   }, [currentProductIndex]);
 
   const handleOpenUserMenu = (event) => {
@@ -117,25 +109,31 @@ export const Navbar = ({ isProductList = false }) => {
     <AppBar
       position="sticky"
       sx={{
-        backgroundColor: '#ffffff',
-        boxShadow: '0px 2px 6px rgba(0, 0, 0, 0.1)',
-        color: 'text.primary',
-        transition: 'box-shadow 0.3s ease',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.15)',
+        color: 'white',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+        transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
         '&:hover': {
-          boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.15)', // Subtle shadow on hover
+          boxShadow: '0px 6px 25px rgba(0, 0, 0, 0.2)',
         },
       }}
     >
       <Toolbar
         sx={{
-          p: 1,
-          height: '4rem',
+          p: { xs: 1, sm: 2 },
+          height: '5rem',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          maxWidth: '1440px',
+          margin: '0 auto',
+          width: '100%',
         }}
       >
-        {/* Logo */}
+        {/* Logo with vibrant gradient */}
         <Typography
           variant="h6"
           noWrap
@@ -143,93 +141,131 @@ export const Navbar = ({ isProductList = false }) => {
           to="/"
           sx={{
             mr: 2,
-            display: { xs: 'none', md: 'flex' },
-            fontWeight: 700,
-            letterSpacing: '.1rem',
-            color: 'primary.main',
+            display: 'flex',
+            alignItems: 'center',
+            fontWeight: 800,
+            letterSpacing: '.15rem',
             textDecoration: 'none',
-            transition: 'color 0.3s ease',
+            transition: 'all 0.3s ease',
             '&:hover': {
-              color: 'primary.dark',
+              transform: 'translateY(-2px)',
             },
           }}
         >
-          <img src="https://res.cloudinary.com/docnp0ctp/image/upload/v1742925244/Apex-store/oqe1wqywljqopu2vzemh.png" alt="Apex Store" style={{ height: '2rem' }} />
-          pex store
+          <img 
+            src="https://res.cloudinary.com/docnp0ctp/image/upload/v1742925244/Apex-store/oqe1wqywljqopu2vzemh.png" 
+            alt="Apex Store" 
+            style={{ 
+              height: '2.5rem',
+              marginRight: '0.75rem',
+              filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.2))'
+            }} 
+          />
+          <span style={{ 
+            background: 'linear-gradient(90deg, #f6d365 0%, #fda085 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            textShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            fontSize: '1.5rem'
+          }}>
+            pex store
+          </span>
         </Typography>
 
-        {/* Search Bar */}
-        <TextField
-          fullWidth
-          placeholder={placeholder || 'Search products...'}
-          value={searchQuery}
-          onChange={handleSearchChange}
-          onSubmit={handleSearchSubmit}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon sx={{ color: 'text.secondary' }} />
-              </InputAdornment>
-            ),
-          }}
-          sx={{
-            maxWidth: '300px',
-            borderRadius: '25px',
-            backgroundColor: 'background.paper',
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: 'black',
-                borderRadius:'25px' 
+        {/* Search Bar with gradient border */}
+        <form onSubmit={handleSearchSubmit} style={{ flex: 1, maxWidth: '600px', margin: '0 2rem' }}>
+          <TextField
+            fullWidth
+            placeholder={placeholder || 'Search products...'}
+            value={searchQuery}
+            onChange={handleSearchChange}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: 'rgba(255,255,255,0.8)' }} />
+                </InputAdornment>
+              ),
+              sx: {
+                borderRadius: '50px',
+                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                backdropFilter: 'blur(5px)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.25)',
+                },
               },
-              '&:hover fieldset': {
-                borderColor: 'primary.main', // Show border on hover
+            }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  border: '2px solid transparent',
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1)) border-box',
+                  borderRadius: '50px',
+                  WebkitMask: 'linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)',
+                  WebkitMaskComposite: 'destination-out',
+                  maskComposite: 'exclude',
+                },
+                '&:hover fieldset': {
+                  border: '2px solid transparent',
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.2)) border-box',
+                },
+                '&.Mui-focused fieldset': {
+                  border: '2px solid transparent',
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.7), rgba(255,255,255,0.3)) border-box',
+                  boxShadow: '0 0 10px rgba(255,255,255,0.3)',
+                },
               },
-              '&.Mui-focused fieldset': {
-                borderColor: 'primary.main', // Show border when focused
+              '& .MuiInputBase-input': {
+                padding: '12px 16px',
+                fontSize: '1rem',
+                color: 'white',
+                '&::placeholder': {
+                  color: 'rgba(255,255,255,0.7)',
+                  opacity: 1,
+                },
               },
-            },
-            '& .MuiInputBase-input': {
-              padding: '8px 12px',
-              fontSize: '0.875rem',
-            },
-          }}
-        />
+            }}
+          />
+        </form>
 
-        {/* Right Section */}
+        {/* Right Section with colorful elements */}
         <Stack
-          flexDirection={'row'}
-          alignItems={'center'}
-          columnGap={2}
+          direction="row"
+          alignItems="center"
+          spacing={2.5}
           sx={{
             '& > *': {
-              color: 'text.primary',
+              color: 'white',
             },
           }}
         >
-          {/* User Menu */}
-          <Tooltip title="Open settings">
+          {/* User Menu with gradient avatar */}
+          <Tooltip title="Account settings" arrow>
             <IconButton
               onClick={handleOpenUserMenu}
               sx={{
                 p: 0,
-                transition: 'transform 0.3s ease',
+                transition: 'all 0.3s ease',
                 '&:hover': {
-                  transform: 'scale(1.1)', // Slight zoom effect on hover
+                  transform: 'translateY(-3px) scale(1.05)',
                 },
               }}
             >
               <Avatar
                 alt={userInfo?.name}
-                src="null"
+                src={null}
                 sx={{
-                  width: 32,
-                  height: 32,
-                  bgcolor: 'primary.main',
+                  width: 40,
+                  height: 40,
+                  background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
                   color: 'white',
-                  fontSize: '1rem',
-                  transition: 'transform 0.3s ease',
+                  fontSize: '1.1rem',
+                  fontWeight: 'bold',
+                  transition: 'all 0.3s ease',
+                  border: '2px solid rgba(255,255,255,0.3)',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
                   '&:hover': {
-                    transform: 'scale(1.1)', // Slight zoom effect on hover
+                    boxShadow: '0 6px 20px rgba(0,0,0,0.3)',
                   },
                 }}
               >
@@ -237,12 +273,26 @@ export const Navbar = ({ isProductList = false }) => {
               </Avatar>
             </IconButton>
           </Tooltip>
+          
           <Menu
             sx={{
-              mt: '45px',
+              mt: '50px',
               '& .MuiPaper-root': {
-                borderRadius: '12px', // Rounded corners for menu
-                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)', // Stronger shadow for depth
+                borderRadius: '16px',
+                boxShadow: '0 15px 35px rgba(0,0,0,0.2)',
+                minWidth: '220px',
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.95))',
+                '& .MuiMenuItem-root': {
+                  padding: '12px 20px',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    background: 'linear-gradient(90deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1))',
+                    '& a': {
+                      color: '#667eea',
+                      transform: 'translateX(5px)',
+                    },
+                  },
+                },
               },
             }}
             id="menu-appbar"
@@ -263,18 +313,27 @@ export const Navbar = ({ isProductList = false }) => {
               <MenuItem onClick={handleCloseUserMenu}>
                 <Typography
                   component={Link}
-                  color={'text.primary'}
+                  color={'#4a5568'}
                   sx={{
                     textDecoration: 'none',
-                    transition: 'color 0.3s ease',
-                    '&:hover': {
-                      color: 'primary.main',
-                    },
+                    transition: 'all 0.2s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    width: '100%',
+                    fontWeight: 500,
                   }}
                   to="/admin/add-product"
                   textAlign="center"
                 >
-                  Add new Product
+                  <span style={{ 
+                    background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    marginRight: '10px'
+                  }}>
+                    ➕
+                  </span>
+                  Add Product
                 </Typography>
               </MenuItem>
             )}
@@ -282,33 +341,50 @@ export const Navbar = ({ isProductList = false }) => {
               <MenuItem key={setting.name} onClick={handleCloseUserMenu}>
                 <Typography
                   component={Link}
-                  color={'text.primary'}
+                  color={'#4a5568'}
                   sx={{
                     textDecoration: 'none',
-                    transition: 'color 0.3s ease',
-                    '&:hover': {
-                      color: 'primary.main',
-                    },
+                    transition: 'all 0.2s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    width: '100%',
+                    fontWeight: 500,
                   }}
                   to={setting.to}
                   textAlign="center"
                 >
+                  <span style={{ 
+                    background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    marginRight: '10px'
+                  }}>
+                    {setting.name === 'Home' && '🏠'}
+                    {setting.name === 'Profile' && '👤'}
+                    {setting.name.includes('orders') && '📦'}
+                    {setting.name === 'Logout' && '🚪'}
+                  </span>
                   {setting.name}
                 </Typography>
               </MenuItem>
             ))}
           </Menu>
 
-          {/* Greeting */}
+          {/* Greeting with subtle gradient */}
           <Typography
             variant="body1"
-            fontWeight={300}
+            fontWeight={600}
             sx={{
               display: { xs: 'none', sm: 'block' },
-              color: 'text.secondary',
-              transition: 'color 0.3s ease',
+              background: 'linear-gradient(90deg, #ffffff, #e0e0e0)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              textShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              transition: 'all 0.3s ease',
               '&:hover': {
-                color: 'primary.main',
+                transform: 'translateY(-2px)',
+                background: 'linear-gradient(90deg, #f6d365, #fda085)',
+                WebkitBackgroundClip: 'text',
               },
             }}
           >
@@ -317,68 +393,94 @@ export const Navbar = ({ isProductList = false }) => {
               : `Hey 👋, ${userInfo?.name}`}
           </Typography>
 
-          {/* Admin Badge */}
+          {/* Admin Badge with vibrant gradient */}
           {loggedInUser?.isAdmin && (
             <Chip
               label="Admin"
               size="small"
               sx={{
-                backgroundColor: 'primary.main',
-                color: 'white',
+                background: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
+                color: '#2d3748',
                 fontWeight: 'bold',
-                borderRadius: '16px', // Pill-shaped badge
-                transition: 'background-color 0.3s ease',
+                borderRadius: '8px',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                transition: 'all 0.3s ease',
+                height: '26px',
+                '& .MuiChip-label': {
+                  padding: '0 10px',
+                },
                 '&:hover': {
-                  backgroundColor: 'primary.dark',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 6px 20px rgba(0,0,0,0.15)',
                 },
               }}
             />
           )}
 
-          {/* Cart Icon */}
+          {/* Cart Icon with gradient hover */}
           {cartItems?.length > 0 && (
             <Badge
               badgeContent={cartItems.length}
-              color="error"
+              overlap="circular"
               sx={{
                 '& .MuiBadge-badge': {
-                  right: 6,
-                  top: 6,
-                  padding: '0 4px',
+                  right: 4,
+                  top: 4,
+                  minWidth: '20px',
+                  height: '20px',
                   fontSize: '0.75rem',
                   fontWeight: 'bold',
-                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #ff7676 0%, #f54ea2 100%)',
+                  color: 'white',
+                  boxShadow: '0 0 0 2px rgba(245,101,101,0.3)',
                 },
               }}
             >
               <IconButton
                 onClick={() => navigate('/cart')}
                 sx={{
-                  transition: 'transform 0.3s ease',
+                  transition: 'all 0.3s ease',
+                  background: 'rgba(255,255,255,0.1)',
+                  borderRadius: '50%',
+                  padding: '10px',
+                  backdropFilter: 'blur(5px)',
                   '&:hover': {
-                    transform: 'scale(1.1)', // Slight zoom effect on hover
-                    backgroundColor: 'action.hover',
+                    transform: 'translateY(-3px) scale(1.1)',
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.3))',
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
+                    '& svg': {
+                      color: '#f6d365',
+                    },
                   },
                 }}
               >
-                <ShoppingCartOutlinedIcon sx={{ fontSize: '1.5rem' }} />
+                <ShoppingCartOutlinedIcon 
+                  sx={{ 
+                    fontSize: '1.7rem',
+                    color: 'rgba(255,255,255,0.9)',
+                    transition: 'all 0.3s ease',
+                  }} 
+                />
               </IconButton>
             </Badge>
           )}
 
-          {/* Wishlist Icon */}
+          {/* Wishlist Icon with pink gradient */}
           {!loggedInUser?.isAdmin && (
             <Badge
               badgeContent={wishlistItems?.length}
-              color="error"
+              overlap="circular"
               sx={{
                 '& .MuiBadge-badge': {
-                  right: 6,
-                  top: 6,
-                  padding: '0 4px',
+                  right: 4,
+                  top: 4,
+                  minWidth: '20px',
+                  height: '20px',
                   fontSize: '0.75rem',
                   fontWeight: 'bold',
-                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #ff7676 0%, #f54ea2 100%)',
+                  color: 'white',
+                  boxShadow: '0 0 0 2px rgba(245,101,101,0.3)',
                 },
               }}
             >
@@ -386,41 +488,61 @@ export const Navbar = ({ isProductList = false }) => {
                 component={Link}
                 to="/wishlist"
                 sx={{
-                  transition: 'transform 0.3s ease',
+                  transition: 'all 0.3s ease',
+                  background: 'rgba(255,255,255,0.1)',
+                  borderRadius: '50%',
+                  padding: '10px',
+                  backdropFilter: 'blur(5px)',
                   '&:hover': {
-                    transform: 'scale(1.1)', // Slight zoom effect on hover
-                    backgroundColor: 'action.hover',
+                    transform: 'translateY(-3px) scale(1.1)',
+                    background: 'linear-gradient(135deg, rgba(255,118,118,0.2), rgba(245,78,162,0.3))',
+                    boxShadow: '0 8px 20px rgba(245,78,162,0.2)',
+                    '& svg': {
+                      color: '#f54ea2',
+                    },
                   },
                 }}
               >
-                <FavoriteBorderIcon sx={{ fontSize: '1.5rem' }} />
+                <FavoriteBorderIcon 
+                  sx={{ 
+                    fontSize: '1.7rem',
+                    color: 'rgba(255,255,255,0.9)',
+                    transition: 'all 0.3s ease',
+                  }} 
+                />
               </IconButton>
             </Badge>
           )}
 
-          {/* Filter Icon */}
+          {/* Filter Icon with gradient */}
           {isProductList && (
             <IconButton
               onClick={handleToggleFilters}
               sx={{
-                transition: 'transform 0.3s ease',
+                transition: 'all 0.3s ease',
+                background: isProductFilterOpen 
+                  ? 'linear-gradient(135deg, rgba(102,126,234,0.3), rgba(118,75,162,0.3))' 
+                  : 'rgba(255,255,255,0.1)',
+                borderRadius: '50%',
+                padding: '10px',
+                backdropFilter: 'blur(5px)',
                 '&:hover': {
-                  transform: 'scale(1.1)', // Slight zoom effect on hover
-                  backgroundColor: 'action.hover',
+                  transform: 'translateY(-3px) scale(1.1)',
+                  background: 'linear-gradient(135deg, rgba(102,126,234,0.4), rgba(118,75,162,0.4))',
+                  boxShadow: '0 8px 20px rgba(102,126,234,0.2)',
                 },
               }}
             >
               <TuneIcon
                 sx={{
-                  fontSize: '1.5rem',
-                  color: isProductFilterOpen ? 'primary.main' : 'text.secondary',
-                  transition: 'color 0.3s ease',
+                  fontSize: '1.7rem',
+                  color: isProductFilterOpen ? '#f6d365' : 'rgba(255,255,255,0.9)',
+                  transition: 'all 0.3s ease',
                 }}
               />
             </IconButton>
           )}
         </Stack>
-        
       </Toolbar>
     </AppBar>
   );
