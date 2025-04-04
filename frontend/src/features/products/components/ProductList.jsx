@@ -18,6 +18,7 @@ import {createWishlistItemAsync, deleteWishlistItemByIdAsync, resetWishlistItemA
 import {selectLoggedInUser} from '../../auth/AuthSlice';
 import {toast} from 'react-toastify';
 import {banner1, banner2, banner3, banner4, loadingAnimation} from '../../../assets';
+import banner5 from '../../../assets/images/banner5.jpg';
 import { resetCartItemAddStatus, selectCartItemAddStatus } from '../../cart/CartSlice';
 import { motion } from 'framer-motion';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -29,7 +30,7 @@ const sortOptions = [
     {name:"Price: high to low", sort:"price", order:"desc"},
 ];
 
-const bannerImages = [banner1, banner3, banner2, banner4];
+const bannerImages = [banner1, banner3, banner2, banner4, banner5];
 
 export const ProductList = () => {
     const navigate = useNavigate();
