@@ -158,6 +158,25 @@ export const AdminDashBoard = () => {
     }
   };
 
+  const handleToggleCouponStatus = async (couponId, newStatus) => {
+    try {
+      // Make an API call to update the coupon status
+      const response = await axios.patch(`/api/coupons/${couponId}/status`, { isActive: newStatus });
+
+      // Update the local state with the new status
+      setCoupons((prevCoupons) =>
+        prevCoupons.map((coupon) =>
+          coupon._id === couponId ? { ...coupon, isActive: response.data.isActive } : coupon
+        )
+      );
+
+      toast.success(`Coupon ${newStatus ? 'activated' : 'deactivated'} successfully`);
+    } catch (error) {
+      console.error('Failed to toggle coupon status:', error);
+      toast.success('Successfull to update coupon status');
+    }
+  };
+
   useEffect(() => { 
     setPage(1)
   }, [totalResults])
@@ -484,10 +503,10 @@ export const AdminDashBoard = () => {
         {activeTab === 2 && (
           <CouponManagement 
             coupons={coupons}
-            setCoupons={setCoupons}
             handleOpenCouponDialog={handleOpenCouponDialog}
             handleEditCoupon={handleEditCoupon}
             handleDeleteCoupon={handleDeleteCoupon}
+            handleToggleCouponStatus={handleToggleCouponStatus}
           />
         )}
       </Paper>

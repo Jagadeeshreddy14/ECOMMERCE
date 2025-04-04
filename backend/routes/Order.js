@@ -8,6 +8,7 @@ router
     .get("/",orderController.getAll)
     .get("/user/:id",orderController.getByUserId)
     .patch("/:id",orderController.updateById)
+    .patch("/:id/cancel", orderController.cancelOrder)
 
 
 module.exports=router

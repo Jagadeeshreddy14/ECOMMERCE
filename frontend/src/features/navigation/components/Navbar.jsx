@@ -353,17 +353,51 @@ export const Navbar = ({ isProductList = false }) => {
                   to={setting.to}
                   textAlign="center"
                 >
-                  <span style={{ 
-                    background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    marginRight: '10px'
-                  }}>
-                    {setting.name === 'Home' && '🏠'}
-                    {setting.name === 'Profile' && '👤'}
-                    {setting.name.includes('orders') && '📦'}
-                    {setting.name === 'Logout' && '🚪'}
-                  </span>
+                  {/* Updated image rendering for all menu items */}
+                  {setting.name === 'Home' && (
+                    <img 
+                      src="https://cdn-icons-png.flaticon.com/512/25/25694.png" 
+                      alt="Home" 
+                      style={{ 
+                        width: '20px', 
+                        height: '20px',
+                        marginRight: '10px'
+                      }} 
+                    />
+                  )}
+                  {setting.name === 'Profile' && (
+                    <img 
+                      src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" 
+                      alt="Profile" 
+                      style={{ 
+                        width: '20px', 
+                        height: '20px',
+                        marginRight: '10px'
+                      }} 
+                    />
+                  )}
+                  {(setting.name === 'Orders' || setting.name === 'My orders') && (
+                    <img 
+                      src="https://cdn-icons-png.flaticon.com/512/3144/3144456.png" 
+                      alt="Orders" 
+                      style={{ 
+                        width: '20px', 
+                        height: '20px',
+                        marginRight: '10px'
+                      }} 
+                    />
+                  )}
+                  {setting.name === 'Logout' && (
+                    <img 
+                      src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" 
+                      alt="Logout" 
+                      style={{ 
+                        width: '20px', 
+                        height: '20px',
+                        marginRight: '10px'
+                      }} 
+                    />
+                  )}
                   {setting.name}
                 </Typography>
               </MenuItem>

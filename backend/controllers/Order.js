@@ -258,20 +258,35 @@ exports.createOrder = async (req, res) => {
 
 exports.cancelOrder = async (req, res) => {
     try {
-        const order = await Order.findById(req.params.id);
-        if (!order) throw new Error('Order not found');
+        const { id } = req.params;
+        const { reason } = req.body;
 
-        // Restore stock
-        for (const item of order.items) {
+        const order = await Order.findById(id);
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        if (order.status === 'Delivered') {
+            return res.status(400).json({ message: 'Delivered orders cannot be cancelled' });
+        }
+
+        // Update order status and cancellation details
+        order.status = 'Cancelled';
+        order.cancellation = {
+            reason,
+            cancelledAt: new Date()
+        };
+
+        // Restore stock for cancelled items
+        for (const item of order.item) {
             const product = await Product.findById(item.product);
             await product.updateStock(item.quantity, 'add', 'order-cancel');
         }
 
-        order.status = 'Cancelled';
         await order.save();
-
-        res.json(order);
+        res.status(200).json({ message: 'Order cancelled successfully', order });
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        console.error('Error cancelling order:', error);
+        res.status(500).json({ message: 'Error cancelling order', error: error.message });
     }
 };

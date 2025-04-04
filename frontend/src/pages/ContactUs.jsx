@@ -61,7 +61,7 @@ export const ContactUs = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Address Card */}
             <a
-              href="https://www.google.com/maps?q=123+Store+Street,+Shopping+City,+12345"
+              href="https://maps.app.goo.gl/9FvsMQLQYLufkYnZ7"
               target="_blank"
               rel="noopener noreferrer"
               className="contact-card bg-white shadow-md hover:shadow-lg transition-shadow p-8 text-center mt-6 rounded-lg"
@@ -70,7 +70,7 @@ export const ContactUs = () => {
                 <MapPin size={40} className="text-green-600" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Our Address</h3>
-              <p className="text-gray-600">123 Store Street, Shopping City, 12345</p>
+              <p className="text-gray-600">Kalasalingam University,Krishnan Kovil, Srivilliputhur, Tamil Nadu 626126</p>
             </a>
 
             {/* Phone Card */}
@@ -89,7 +89,7 @@ export const ContactUs = () => {
             >
               <div className="icon-container">
                 <Mail size={40} className="text-green-600" />
-              </div>
+              </div>a
               <h3 className="text-xl font-semibold mb-2">Email Us</h3>
               <p className="text-gray-600">info@apexstore.com</p>
             </a>

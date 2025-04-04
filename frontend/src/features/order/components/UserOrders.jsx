@@ -13,11 +13,12 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { motion } from 'framer-motion';
 import ReplayIcon from '@mui/icons-material/Replay';
 import { useForm } from 'react-hook-form';
-import {  selectReturnStatus, createReturnAsync } from '../../returns/ReturnSlice';
+import { selectReturnStatus, createReturnAsync } from '../../returns/ReturnSlice';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import InfoIcon from '@mui/icons-material/Info';
+import { cancelOrderById } from '../OrderApi'; // Adjust the path based on the actual location
 
 const ReturnForm = ({ order, onSubmit, onCancel }) => {
   const { register, handleSubmit, formState: { errors } } = useForm();
@@ -259,6 +260,22 @@ export const UserOrders = () => {
             setReturnOrderId(null); // Close the return form
         } catch (error) {
             toast.error(error.message || 'Failed to submit return request');
+        }
+    };
+
+    const handleCancelOrder = async (orderId) => {
+        const reason = prompt('Please provide a reason for cancellation:');
+        if (!reason) {
+            toast.error('Cancellation reason is required');
+            return;
+        }
+
+        try {
+            await cancelOrderById(orderId, reason);
+            toast.success('Order cancelled successfully');
+            dispatch(getOrderByUserIdAsync(loggedInUser._id)); // Refresh orders
+        } catch (error) {
+            toast.error(error.message || 'Failed to cancel order');
         }
     };
 
@@ -509,6 +526,22 @@ export const UserOrders = () => {
                                             >
                                                 Return Order
                                             </Button>
+                                        )}
+                                        {order.status === 'Pending' && (
+                                            <Button
+                                                variant="outlined"
+                                                color="error"
+                                                onClick={() => handleCancelOrder(order._id)}
+                                            >
+                                                Cancel Order
+                                            </Button>
+                                        )}
+                                        {order.status === 'Cancelled' && (
+                                            <Stack spacing={1}>
+                                                <Typography color="error">Order Cancelled</Typography>
+                                                <Typography variant="body2">Reason: {order.cancellation.reason}</Typography>
+                                                <Typography variant="body2">Cancelled At: {new Date(order.cancellation.cancelledAt).toLocaleString()}</Typography>
+                                            </Stack>
                                         )}
                                     </Stack>
                                     {returnOrderId === order._id && <ReturnForm order={order} onSubmit={handleReturnSubmit} onCancel={() => setReturnOrderId(null)} />}

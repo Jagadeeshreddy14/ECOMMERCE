@@ -1,6 +1,5 @@
 import {axiosi} from '../../config/axios'
 
-
 export const createOrder=async(order)=>{
     try {
         const res=await axiosi.post("/orders",order)
@@ -36,3 +35,21 @@ export const updateOrderById=async(update)=>{
         throw error.response.data
     }
 }
+
+export const cancelOrderById = async (id, reason) => {
+    try {
+        const response = await axiosi.patch(`/orders/${id}/cancel`, { reason });
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+};
+
+export const getOrderById = async (id) => {
+    try {
+        const response = await axiosi.get(`/orders/${id}`);
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+};

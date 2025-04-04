@@ -17,7 +17,7 @@ const orderSchema=new Schema({
     },
     status:{
         type:String,
-        enum:['Pending','Dispatched','Out for delivery','Delivered','Cancelled','Return Requested','Return Approved','Return Rejected','Returned'],
+        enum:['Pending','Dispatched','Out for delivery','Delivered','Cancelled'],
         default:'Pending'
     },
     paymentMode:{
@@ -45,6 +45,10 @@ const orderSchema=new Schema({
         images: [String],
         responseDate: Date,
         responseMessage: String
+    },
+    cancellation: {
+        reason: { type: String, default: null },
+        cancelledAt: { type: Date, default: null }
     }
 },{versionKey:false})
 
