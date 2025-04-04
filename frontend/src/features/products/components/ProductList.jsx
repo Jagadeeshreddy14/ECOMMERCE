@@ -59,6 +59,7 @@ export const ProductList = () => {
     const isProductFilterOpen = useSelector(selectProductIsFilterOpen);
 
     const dispatch = useDispatch();
+    const [bannerIndex, setBannerIndex] = useState(0);
 
     const handleBrandFilters = (e) => {
         const filterSet = new Set(filters.brand);
@@ -86,6 +87,14 @@ export const ProductList = () => {
     useEffect(() => {
         setPage(1);
     }, [totalResults]);
+
+    useEffect(() => {
+       const intervalId = setInterval(() => {
+            setBannerIndex((prevIndex) => (prevIndex + 1) % bannerImages.length);
+        }, 5000); // Change banner every 5 seconds
+
+        return () => clearInterval(intervalId);
+    }, [bannerImages.length]);
 
     useEffect(() => {
         const finalFilters = {...filters};
@@ -137,10 +146,11 @@ export const ProductList = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        backgroundImage: `url(${bannerImages[0]})`,
+                        backgroundImage: `url(${bannerImages[bannerIndex]})`,
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
-                        opacity: 0.7
+                        opacity: 0.7,
+                        transition: 'background-image 1s ease-in-out'
                     }
                 }}>
                     <Box sx={{
@@ -166,14 +176,14 @@ export const ProductList = () => {
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent'
                         }}>
-                            Shop our selection of<br />Makeup products
+                         
                         </Typography>
                         <Typography variant="body1" sx={{ 
                             maxWidth: '800px',
                             textShadow: '1px 1px 4px rgba(0,0,0,0.3)',
                             fontSize: '1.1rem'
                         }}>
-                            We are displaying products that ship to your location. You can select a different location in the menu above.
+                           
                         </Typography>
                     </Box>
                 </Box>

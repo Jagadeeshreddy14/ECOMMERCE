@@ -38,7 +38,7 @@ import {
 } from '../../review/ReviewSlice';
 import { Reviews } from '../../review/components/Reviews';
 import { toast } from 'react-toastify';
-import { MotionConfig, motion } from 'framer-motion';
+import { MotionConfig, motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import CachedOutlinedIcon from '@mui/icons-material/CachedOutlined';
@@ -87,6 +87,9 @@ const ProductDetails = () => {
   const is387 = useMediaQuery(theme.breakpoints.down(387));
   const is340 = useMediaQuery(theme.breakpoints.down(340));
   const [customization, setCustomization] = useState('');
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const y = useMotionValue(0);
+  const rotateY = useTransform(y, [-100, 100], [-30, 30]);
 
   const isProductAlreadyInCart = useMemo(() => {
     return product && cartItems?.some(item => 
@@ -178,7 +181,7 @@ const ProductDetails = () => {
     };
   }, []);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!loggedInUser?._id) {
       toast.error('Please log in to add items to the cart');
       navigate('/login');
@@ -189,15 +192,40 @@ const ProductDetails = () => {
       toast.error('Product not found');
       return;
     }
-  
-    const item = { 
-      user: loggedInUser._id, 
-      product: id, 
-      quantity,
-      customization: product.customizable ? customization : null, // Include customization if enabled
-    };
-    dispatch(addToCartAsync(item));
-    setQuantity(1);
+
+    setIsAddingToCart(true); // Start animation
+    
+    // Animate the y value
+    y.set(0); // Reset to initial position
+    animate(y, -50, { // Use animate function directly
+      duration: 0.3,
+      type: 'spring',
+      bounce: 0.2,
+      onComplete: () => {
+        animate(y, 0, {
+          duration: 0.3,
+          type: 'spring',
+          bounce: 0.2,
+          onComplete: async () => {
+            const item = { 
+              user: loggedInUser._id, 
+              product: id, 
+              quantity,
+              customization: product.customizable ? customization : null, // Include customization if enabled
+            };
+
+            try {
+              await dispatch(addToCartAsync(item)).unwrap(); // Use unwrap to handle promise
+              setQuantity(1);
+            } catch (error) {
+              // Error handled by toast in useEffect
+            } finally {
+              setIsAddingToCart(false); // End animation
+            }
+          }
+        })
+      }
+    });
   };
 
   const handleDecreaseQty = () => {
@@ -571,7 +599,7 @@ const ProductDetails = () => {
                     variant="contained"
                     size="large"
                     onClick={handleAddToCart}
-                    disabled={isProductAlreadyInCart}
+                    disabled={isProductAlreadyInCart || isAddingToCart}
                     sx={{
                       height: 48,
                       borderRadius: 2,
@@ -588,7 +616,15 @@ const ProductDetails = () => {
                       transition: 'all 0.2s ease'
                     }}
                   >
-                    {isProductAlreadyInCart ? 'Added to Cart' : 'Add to Cart'}
+                    {isAddingToCart ? (
+                      <motion.div
+                        style={{ y: y }}
+                      >
+                        Adding...
+                      </motion.div>
+                    ) : (
+                      isProductAlreadyInCart ? 'Added to Cart' : 'Add to Cart'
+                    )}
                   </Button>
 
                   <IconButton
