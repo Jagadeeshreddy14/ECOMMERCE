@@ -616,21 +616,29 @@ export const AdminOrders = () => {
                         </Typography>
                       </TableCell>
                       <TableCell align="right">
-                        {editIndex === index ? (
-                          <FormControl fullWidth size="small">
-                            <Select
-                              defaultValue={order.status}
-                              {...register('status', { required: true })}
+                        {order.status === 'Cancelled' ? (
+                          <Tooltip 
+                            title={
+                              <Stack spacing={1}>
+                                <Typography variant="body2">
+                                  <strong>Reason:</strong> {order.cancellation?.reason || 'Not specified'}
+                                </Typography>
+                                <Typography variant="body2">
+                                  <strong>Cancelled At:</strong> {new Date(order.cancellation?.cancelledAt).toLocaleString()}
+                                </Typography>
+                              </Stack>
+                            }
+                            placement="top"
+                          >
+                            <Chip 
+                              label="Cancelled" 
                               sx={{ 
-                                minWidth: 150,
-                                '& .MuiSelect-select': { py: 0.65 }
+                                backgroundColor: colors.error, 
+                                color: colors.paper 
                               }}
-                            >
-                              {editOptions.map((option) => (
-                                <MenuItem key={option} value={option}>{option}</MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
+                              size="small"
+                            />
+                          </Tooltip>
                         ) : (
                           <Chip 
                             label={order.status} 
@@ -872,6 +880,34 @@ export const AdminOrders = () => {
 
               {/* Return Request Details */}
               <ReturnRequestDetails order={selectedOrder} />
+
+              {/* Cancellation Details */}
+              {selectedOrder?.status === 'Cancelled' && selectedOrder?.cancellation && (
+                <Box>
+                  <Typography variant="subtitle2" gutterBottom sx={{ 
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    color: colors.error
+                  }}>
+                    <Clear fontSize="small" />
+                    Cancellation Details
+                  </Typography>
+                  <Stack spacing={1} sx={{ 
+                    backgroundColor: colors.grey100, 
+                    p: 2, 
+                    borderRadius: 1 
+                  }}>
+                    <Typography variant="body2">
+                      <strong>Reason:</strong> {selectedOrder.cancellation.reason || 'Not specified'}
+                    </Typography>
+                    <Typography variant="body2">
+                      <strong>Cancelled At:</strong> {new Date(selectedOrder.cancellation.cancelledAt).toLocaleString()}
+                    </Typography>
+                  </Stack>
+                </Box>
+              )}
             </Stack>
           )}
         </DialogContent>

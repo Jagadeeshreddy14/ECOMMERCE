@@ -261,32 +261,28 @@ exports.cancelOrder = async (req, res) => {
         const { id } = req.params;
         const { reason } = req.body;
 
+        // Find the order by ID
         const order = await Order.findById(id);
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });
         }
 
+        // Check if the order can be canceled
         if (order.status === 'Delivered') {
-            return res.status(400).json({ message: 'Delivered orders cannot be cancelled' });
+            return res.status(400).json({ message: 'Delivered orders cannot be canceled' });
         }
 
-        // Update order status and cancellation details
+        // Update the order status and cancellation reason
         order.status = 'Cancelled';
         order.cancellation = {
             reason,
-            cancelledAt: new Date()
+            cancelledAt: new Date(),
         };
 
-        // Restore stock for cancelled items
-        for (const item of order.item) {
-            const product = await Product.findById(item.product);
-            await product.updateStock(item.quantity, 'add', 'order-cancel');
-        }
-
         await order.save();
-        res.status(200).json({ message: 'Order cancelled successfully', order });
+        res.status(200).json({ message: 'Order canceled successfully', order });
     } catch (error) {
-        console.error('Error cancelling order:', error);
-        res.status(500).json({ message: 'Error cancelling order', error: error.message });
+        console.error('Error canceling order:', error);
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
 };
