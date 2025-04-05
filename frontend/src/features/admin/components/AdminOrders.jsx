@@ -176,24 +176,10 @@ export const AdminOrders = () => {
   // Handle order status update
   const handleUpdateOrder = async (data) => {
     try {
-      const orderToUpdate = filteredOrders[editIndex];
-      if (!orderToUpdate) {
-        toast.error('No order selected for update');
-        return;
-      }
-
-      const update = { ...data, _id: orderToUpdate._id };
-      await dispatch(updateOrderByIdAsync(update)).unwrap();
-
-      // Show success message
+      await dispatch(updateOrderByIdAsync(data)).unwrap();
       toast.success('Order status updated successfully');
-
-      // Wait for 5 seconds before closing the edit mode
-      setTimeout(() => {
-        setEditIndex(-1);
-        reset();
-      }, 100000);
-
+      setEditIndex(-1); // Reset edit mode immediately after update
+      reset();
     } catch (error) {
       toast.error(error.message || 'Failed to update order');
       if (error.message?.includes('Unauthorized')) navigate('/login');
@@ -650,19 +636,32 @@ export const AdminOrders = () => {
                       <TableCell align="center">
                         <Stack direction="row" spacing={1} justifyContent="center">
                           {editIndex === index ? (
-                            <Tooltip title="Confirm">
-                              <IconButton 
-                                type="submit"
-                                color="success"
+                            <FormControl size="small" sx={{ minWidth: 120 }}>
+                              <Select
+                                value={order.status}
+                                onChange={(e) => {
+                                  const data = { status: e.target.value };
+                                  handleUpdateOrder({ ...data, _id: order._id });
+                                }}
                                 size="small"
+                                sx={{
+                                  backgroundColor: colors.paper,
+                                  '& .MuiOutlinedInput-notchedOutline': {
+                                    borderColor: colors.border
+                                  }
+                                }}
                               >
-                                <CheckCircleOutlined />
-                              </IconButton>
-                            </Tooltip>
+                                {editOptions.map((option) => (
+                                  <MenuItem key={option} value={option}>
+                                    {option}
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                            </FormControl>
                           ) : (
                             <Tooltip title="Edit status">
                               <IconButton 
-                                onClick={() => setEditIndex(index)} // Automatically set editIndex
+                                onClick={() => setEditIndex(index)}
                                 color="primary"
                                 size="small"
                               >
