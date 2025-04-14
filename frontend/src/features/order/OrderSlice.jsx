@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { createOrder, getAllOrders, getOrderByUserId, updateOrderById } from './OrderApi';
-import Rating from '@mui/lab/Rating'; // Updated import for MUI v5
+import Rating from '@mui/material/Rating'; // Updated import for MUI v5
 
 const initialState = {
   status: 'idle',
