@@ -38,7 +38,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { SalesDashboard } from './SalesDashboard';
+import SalesDashboard from './SalesDashboard';
 import { CouponManagement } from './CouponManagement';
 
 // Configure axios base URL
