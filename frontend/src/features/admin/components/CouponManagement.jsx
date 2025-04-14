@@ -49,8 +49,8 @@ import {
                   <TableCell>{new Date(coupon.endDate).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <Chip 
-                      label={coupon.isActive ? 'Active' : 'Inactive'}
-                      color={coupon.isActive ? 'success' : 'error'}
+                      label={coupon.isActive ? 'Inactive' : 'Active'}
+                      color={coupon.isActive ? 'error' : 'success'}
                     />
                   </TableCell>
                   <TableCell>
