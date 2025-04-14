@@ -785,7 +785,7 @@ export const AdminOrders = () => {
                     <Typography>{selectedOrder.address[0].postalCode}</Typography>
                     <Typography>{selectedOrder.address[0].country}</Typography>
                     <Typography mt={1}>
-                      <strong>Phone:</strong> {selectedOrder.address[0].phone}
+                      <strong>Phone:</strong> {selectedOrder.address[0].phoneNumber}
                     </Typography>
                   </Stack>
                 ) : (
