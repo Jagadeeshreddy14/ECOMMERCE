@@ -734,7 +734,7 @@ export const Checkout = () => {
 
   const handleApplyCoupon = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/coupons/validate', {
+      const response = await fetch('https://apex-store-backend-y1tk.onrender.com/api/coupons/validate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
