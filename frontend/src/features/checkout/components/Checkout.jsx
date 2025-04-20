@@ -12,8 +12,7 @@ import { resetCartByUserIdAsync, selectCartItems } from '../../cart/CartSlice';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { SHIPPING, TAXES } from '../../../constants';
 import { motion } from 'framer-motion';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 import axios from 'axios';
 import { formatPrice } from '../../../utils/formatPrice';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
@@ -50,23 +49,6 @@ const THEME_COLORS = {
   }
 };
 
-// Add custom toast styles
-const toastConfig = {
-  position: "top-right",
-  autoClose: 3000,
-  hideProgressBar: false,
-  closeOnClick: true,
-  pauseOnHover: true,
-  draggable: true,
-  progress: undefined,
-  style: {
-    backgroundColor: THEME_COLORS.cardBg,
-    color: THEME_COLORS.text.primary,
-    borderRadius: '8px',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-  }
-};
-
 const PriceDetail = ({ label, value, type = "regular" }) => (
   <Stack 
     direction="row" 
@@ -95,54 +77,50 @@ const PriceDetail = ({ label, value, type = "regular" }) => (
   </Stack>
 );
 
-const OrderSummaryCard = ({ cartItem }) => {
-  const discountedPrice = cartItem.product.price - cartItem.product.discountAmount;
-
-  return (
-    <Paper
-      elevation={0}
-      sx={{
-        p: 2,
-        mb: 1,
-        border: '1px solid',
-        borderColor: 'divider',
-        borderRadius: 1,
-        '&:hover': { bgcolor: 'grey.50' }
-      }}
-    >
-      <Stack direction="row" spacing={2}>
-        <Box
-          component="img"
-          src={cartItem.product.images[0]}
-          alt={cartItem.product.title}
-          sx={{
-            width: 60,
-            height: 60,
-            borderRadius: 1,
-            objectFit: 'cover'
-          }}
-        />
-        <Stack flex={1} justifyContent="space-between">
-          <Typography variant="subtitle2" noWrap>
-            {cartItem.product.title}
+const OrderSummaryCard = ({ cartItem }) => (
+  <Paper
+    elevation={0}
+    sx={{
+      p: 2,
+      mb: 1,
+      border: '1px solid',
+      borderColor: 'divider',
+      borderRadius: 1,
+      '&:hover': { bgcolor: 'grey.50' }
+    }}
+  >
+    <Stack direction="row" spacing={2}>
+      <Box
+        component="img"
+        src={cartItem.product.images[0]}
+        alt={cartItem.product.title}
+        sx={{
+          width: 60,
+          height: 60,
+          borderRadius: 1,
+          objectFit: 'cover'
+        }}
+      />
+      <Stack flex={1} justifyContent="space-between">
+        <Typography variant="subtitle2" noWrap>
+          {cartItem.product.title}
+        </Typography>
+        <Stack 
+          direction="row" 
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Typography variant="body2" color="text.secondary">
+            Qty: {cartItem.quantity} × {formatPrice(cartItem.product.price)}
           </Typography>
-          <Stack 
-            direction="row" 
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Typography variant="body2" color="text.secondary">
-              Qty: {cartItem.quantity} × {formatPrice(discountedPrice)}
-            </Typography>
-            <Typography variant="subtitle2" color="primary.main">
-              {formatPrice(discountedPrice * cartItem.quantity)}
-            </Typography>
-          </Stack>
+          <Typography variant="subtitle2" color="primary.main">
+            {formatPrice(cartItem.product.price * cartItem.quantity)}
+          </Typography>
         </Stack>
       </Stack>
-    </Paper>
-  );
-};
+    </Stack>
+  </Paper>
+);
 
 const StyledTextField = ({ icon, ...props }) => (
   <TextField
@@ -182,11 +160,7 @@ export const OrderSummarySection = ({
   handleCreateOrder,
   selectedPaymentMethod
 }) => {
-  const subtotal = cartItems.reduce((acc, item) => {
-    const discountedPrice = item.product.price - item.product.discountAmount;
-    return acc + (discountedPrice * item.quantity);
-  }, 0);
-  const finalAmount = subtotal + SHIPPING + TAXES - (appliedCoupon ? calculateDiscount(appliedCoupon) : 0);
+  const finalAmount = orderTotal + SHIPPING + TAXES - (appliedCoupon ? calculateDiscount(appliedCoupon) : 0);
 
   return (
     <Paper 
@@ -298,7 +272,7 @@ export const OrderSummarySection = ({
             borderColor: 'divider'
           }}
         >
-          <PriceDetail label="Subtotal" value={subtotal} />
+          <PriceDetail label="Subtotal" value={orderTotal} />
           <PriceDetail label="Shipping" value={SHIPPING} />
           <PriceDetail label="Tax" value={TAXES} />
           
@@ -359,199 +333,6 @@ export const OrderSummarySection = ({
   );
 };
 
-// Add this before any component definitions
-const formValidation = {
-  type: { 
-    required: "Address type is required",
-    minLength: { value: 2, message: "Type must be at least 2 characters" }
-  },
-  street: { 
-    required: "Street address is required",
-    minLength: { value: 5, message: "Street address must be at least 5 characters" }
-  },
-  phoneNumber: {
-    required: "Phone number is required",
-    pattern: {
-      value: /^\d{10}$/,
-      message: "Please enter a valid 10-digit phone number"
-    }
-  },
-  country: { 
-    required: "Country is required",
-    minLength: { value: 2, message: "Country must be at least 2 characters" }
-  },
-  city: { 
-    required: "City is required",
-    minLength: { value: 2, message: "City must be at least 2 characters" }
-  },
-  state: { 
-    required: "State is required",
-    minLength: { value: 2, message: "State must be at least 2 characters" }
-  },
-  postalCode: {
-    required: "Postal code is required",
-    pattern: {
-      value: /^\d{6}$/,
-      message: "Please enter a valid 6-digit postal code"
-    }
-  }
-};
-
-const AddressForm = ({ register, errors, handleSubmit, handleAddAddress, reset, addressStatus, formValidation }) => (
-  <Stack 
-    component="form" 
-    noValidate 
-    spacing={3} 
-    onSubmit={handleSubmit(handleAddAddress)}
-    sx={{
-      p: 4,
-      border: '1px solid',
-      borderColor: THEME_COLORS.border,
-      borderRadius: 3,
-      bgcolor: THEME_COLORS.cardBg,
-      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-      transition: 'all 0.3s ease'
-    }}
-  >
-    <Stack direction="row" alignItems="center" spacing={1}>
-      <Typography variant="h6" fontWeight={600} color={THEME_COLORS.text.primary}>
-        Add New Address
-      </Typography>
-    </Stack>
-
-    <Grid container spacing={2.5}>
-      <Grid item xs={12} sm={6}>
-        <TextField
-          fullWidth
-          label="Address Type"
-          placeholder="Home, Office, etc."
-          {...register("type", formValidation.type)}
-          error={!!errors.type}
-          helperText={errors.type?.message}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              borderRadius: 2,
-              '&:hover fieldset': {
-                borderColor: THEME_COLORS.primary,
-              }
-            }
-          }}
-        />
-      </Grid>
-      
-      <Grid item xs={12}>
-        <TextField
-          fullWidth
-          label="Street Address"
-          multiline
-          rows={2}
-          {...register("street", formValidation.street)}
-          error={!!errors.street}
-          helperText={errors.street?.message}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              borderRadius: 2
-            }
-          }}
-        />
-      </Grid>
-
-      <Grid item xs={12} sm={6}>
-        <TextField
-          fullWidth
-          label="Phone Number"
-          type="tel"
-          {...register("phoneNumber", formValidation.phoneNumber)}
-          error={!!errors.phoneNumber}
-          helperText={errors.phoneNumber?.message}
-        />
-      </Grid>
-
-      <Grid item xs={12} sm={6}>
-        <TextField
-          fullWidth
-          label="Country"
-          {...register("country", formValidation.country)}
-          error={!!errors.country}
-          helperText={errors.country?.message}
-        />
-      </Grid>
-
-      <Grid item xs={12} sm={4}>
-        <TextField
-          fullWidth
-          label="City"
-          {...register("city", formValidation.city)}
-          error={!!errors.city}
-          helperText={errors.city?.message}
-        />
-      </Grid>
-
-      <Grid item xs={12} sm={4}>
-        <TextField
-          fullWidth
-          label="State"
-          {...register("state", formValidation.state)}
-          error={!!errors.state}
-          helperText={errors.state?.message}
-        />
-      </Grid>
-
-      <Grid item xs={12} sm={4}>
-        <TextField
-          fullWidth
-          label="Postal Code"
-          type="number"
-          {...register("postalCode", formValidation.postalCode)}
-          error={!!errors.postalCode}
-          helperText={errors.postalCode?.message}
-        />
-      </Grid>
-
-      <Grid item xs={12}>
-        <Stack 
-          direction="row" 
-          spacing={2} 
-          justifyContent="flex-end"
-        >
-          <Button
-            variant="outlined"
-            onClick={() => reset()}
-            sx={{
-              borderRadius: 2,
-              color: THEME_COLORS.text.secondary,
-              borderColor: THEME_COLORS.border,
-              '&:hover': {
-                borderColor: THEME_COLORS.primary,
-                bgcolor: 'rgba(37, 99, 235, 0.04)'
-              }
-            }}
-          >
-            Reset
-          </Button>
-          <LoadingButton
-            loading={addressStatus === 'pending'}
-            type="submit"
-            variant="contained"
-            sx={{
-              borderRadius: 2,
-              bgcolor: THEME_COLORS.primary,
-              '&:hover': {
-                bgcolor: THEME_COLORS.primary,
-                transform: 'translateY(-1px)',
-                boxShadow: '0 4px 8px rgba(37, 99, 235, 0.25)'
-              },
-              transition: 'all 0.2s ease'
-            }}
-          >
-            Save Address
-          </LoadingButton>
-        </Stack>
-      </Grid>
-    </Grid>
-  </Stack>
-);
-
 export const Checkout = () => {
   const status = '';
   const addresses = useSelector(selectAddresses);
@@ -565,35 +346,13 @@ export const Checkout = () => {
   const cartItems = useSelector(selectCartItems);
   const orderStatus = useSelector(selectOrderStatus);
   const currentOrder = useSelector(selectCurrentOrder);
-  // const orderTotal = cartItems.reduce((acc, item) => (item.product.price * item.quantity) + acc, 0);
+  const orderTotal = cartItems.reduce((acc, item) => (item.product.price * item.quantity) + acc, 0);
   const theme = useTheme();
   const is900 = useMediaQuery(theme.breakpoints.down(900));
   const is480 = useMediaQuery(theme.breakpoints.down(480));
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponError, setCouponError] = useState('');
-
-  const formValidation = {
-    type: { required: "Address type is required" },
-    street: { required: "Street address is required" },
-    phoneNumber: {
-      required: "Phone number is required",
-      pattern: {
-        value: /^\d{10}$/,
-        message: "Please enter a valid 10-digit phone number"
-      }
-    },
-    country: { required: "Country is required" },
-    city: { required: "City is required" },
-    state: { required: "State is required" },
-    postalCode: {
-      required: "Postal code is required",
-      pattern: {
-        value: /^\d{6}$/,
-        message: "Please enter a valid 6-digit postal code"
-      }
-    }
-  };
 
   const calculateDiscount = (coupon) => {
     if (!coupon || !orderTotal) return 0;
@@ -617,11 +376,10 @@ export const Checkout = () => {
   useEffect(() => {
     if (addressStatus === 'fulfilled') {
       reset();
-      toast.success('Address saved successfully!');
     } else if (addressStatus === 'rejected') {
-      toast.error('Failed to save address');
+      alert('Error adding your address');
     }
-  }, [addressStatus, reset]);
+  }, [addressStatus]);
 
   useEffect(() => {
     if (currentOrder && currentOrder?._id) {
@@ -630,34 +388,9 @@ export const Checkout = () => {
     }
   }, [currentOrder]);
 
-  const handleAddAddress = async (data) => {
-    try {
-      if (!loggedInUser?._id) {
-        toast.error('Please login to add address', toastConfig);
-        return;
-      }
-  
-      const addressData = {
-        ...data,
-        user: loggedInUser._id
-      };
-  
-      const result = await dispatch(addAddressAsync(addressData)).unwrap();
-      
-      if (result) {
-        toast.success('Address saved successfully!', {
-          ...toastConfig,
-          icon: '🏠'
-        });
-        setSelectedAddress(result);
-        reset();
-      }
-    } catch (error) {
-      toast.error(error.message || 'Failed to save address', {
-        ...toastConfig,
-        icon: '❌'
-      });
-    }
+  const handleAddAddress = (data) => {
+    const address = { ...data, user: loggedInUser._id };
+    dispatch(addAddressAsync(address));
   };
 
   const handleCreateOrder = async () => {
@@ -665,14 +398,6 @@ export const Checkout = () => {
       toast.error('Please select a delivery address');
       return;
     }
-
-    // Calculate the total amount considering discounts
-    const subtotal = cartItems.reduce((acc, item) => {
-      const discountedPrice = item.product.price - item.product.discountAmount;
-      return acc + (discountedPrice * item.quantity);
-    }, 0);
-    const discountAmount = appliedCoupon ? calculateDiscount(appliedCoupon) : 0;
-    const totalAmount = subtotal + SHIPPING + TAXES - discountAmount;
 
     if (selectedPaymentMethod === 'CARD') {
       // Load Razorpay script
@@ -683,8 +408,8 @@ export const Checkout = () => {
 
       script.onload = () => {
         const options = {
-          key: "rzp_test_48B2W8nnEMHLog", // Replace with your test key
-          amount: totalAmount * 100, // Amount in paise
+          key: "rzp_live_kYGlb6Srm9dDRe", // Replace with your test key
+          amount: (orderTotal + SHIPPING + TAXES) * 100, // Amount in paise
           currency: "INR",
           name: "Apex Store",
           description: "Order Payment",
@@ -697,9 +422,8 @@ export const Checkout = () => {
                 item: cartItems,
                 address: selectedAddress,
                 paymentMode: selectedPaymentMethod,
-                total: totalAmount,
-                paymentId: response.razorpay_payment_id,
-                discount: discountAmount // Include the discount amount
+                total: orderTotal + SHIPPING + TAXES,
+                paymentId: response.razorpay_payment_id
               };
               dispatch(createOrderAsync(order));
               toast.success('Payment Successful!');
@@ -725,8 +449,7 @@ export const Checkout = () => {
         item: cartItems,
         address: selectedAddress,
         paymentMode: selectedPaymentMethod,
-        total: totalAmount,
-        discount: discountAmount // Include the discount amount
+        total: orderTotal + SHIPPING + TAXES
       };
       dispatch(createOrderAsync(order));
     }
@@ -734,7 +457,7 @@ export const Checkout = () => {
 
   const handleApplyCoupon = async () => {
     try {
-      const response = await fetch('https://apex-store-backend-y1tk.onrender.com/api/coupons/validate', {
+      const response = await fetch('http://localhost:8000/api/coupons/validate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -761,12 +484,6 @@ export const Checkout = () => {
     }
   };
 
-  // Calculate the order total considering discounts
-  const orderTotal = cartItems.reduce((acc, item) => {
-    const discountedPrice = item.product.price - item.product.discountAmount;
-    return acc + (discountedPrice * item.quantity);
-  }, 0);
-
   return (
     <Box sx={{ 
       bgcolor: THEME_COLORS.background, 
@@ -788,15 +505,151 @@ export const Checkout = () => {
               </Stack>
 
               {/* address form */}
-              <AddressForm 
-                register={register} 
-                errors={errors} 
-                handleSubmit={handleSubmit} 
-                handleAddAddress={handleAddAddress} 
-                reset={reset} 
-                addressStatus={addressStatus} 
-                formValidation={formValidation} // Add this prop
-              />
+              <Stack 
+                component="form" 
+                noValidate 
+                spacing={3} 
+                onSubmit={handleSubmit(handleAddAddress)}
+                sx={{
+                  p: 4,
+                  border: '1px solid',
+                  borderColor: THEME_COLORS.border,
+                  borderRadius: 3,
+                  bgcolor: THEME_COLORS.cardBg,
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+                  '&:hover': {
+                    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)'
+                  },
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <LocationOnIcon color="primary" />
+                  <Typography variant="h6">Add New Address</Typography>
+                </Stack>
+
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <StyledTextField
+                      icon={<HomeIcon />}
+                      label="Address Type"
+                      placeholder="Home, Office, etc."
+                      {...register("type", { 
+                        required: "Address type is required" 
+                      })}
+                      error={!!errors.type}
+                      helperText={errors.type?.message}
+                    />
+                  </Grid>
+                  
+                  <Grid item xs={12}>
+                    <StyledTextField
+                      icon={<LocationOnIcon />}
+                      label="Street Address"
+                      multiline
+                      rows={2}
+                      {...register("street", { 
+                        required: "Street address is required" 
+                      })}
+                      error={!!errors.street}
+                      helperText={errors.street?.message}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={6}>
+                    <StyledTextField
+                      icon={<PhoneIcon />}
+                      label="Phone Number"
+                      type="tel"
+                      {...register("phoneNumber", { 
+                        required: "Phone number is required",
+                        pattern: {
+                          value: /^\d{10}$/,
+                          message: "Please enter a valid 10-digit number"
+                        }
+                      })}
+                      error={!!errors.phoneNumber}
+                      helperText={errors.phoneNumber?.message}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={6}>
+                    <StyledTextField
+                      icon={<PublicIcon />}
+                      label="Country"
+                      {...register("country", { 
+                        required: "Country is required" 
+                      })}
+                      error={!!errors.country}
+                      helperText={errors.country?.message}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={4}>
+                    <StyledTextField
+                      icon={<LocationCityIcon />}
+                      label="City"
+                      {...register("city", { 
+                        required: "City is required" 
+                      })}
+                      error={!!errors.city}
+                      helperText={errors.city?.message}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={4}>
+                    <StyledTextField
+                      icon={<LocationCityIcon />}
+                      label="State"
+                      {...register("state", { 
+                        required: "State is required" 
+                      })}
+                      error={!!errors.state}
+                      helperText={errors.state?.message}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={4}>
+                    <StyledTextField
+                      icon={<LocationOnIcon />}
+                      label="Postal Code"
+                      type="number"
+                      {...register("postalCode", { 
+                        required: "Postal code is required",
+                        pattern: {
+                          value: /^\d{6}$/,
+                          message: "Please enter a valid 6-digit postal code"
+                        }
+                      })}
+                      error={!!errors.postalCode}
+                      helperText={errors.postalCode?.message}
+                    />
+                  </Grid>
+                </Grid>
+
+                <Stack 
+                  direction="row" 
+                  spacing={2} 
+                  justifyContent="flex-end"
+                >
+                  <Button
+                    variant="outlined"
+                    color="inherit"
+                    onClick={() => reset()}
+                    startIcon={<ClearIcon />}
+                  >
+                    Reset
+                  </Button>
+                  <LoadingButton
+                    loading={status === 'pending'}
+                    type="submit"
+                    variant="contained"
+                    startIcon={<SaveIcon />}
+                  >
+                    Save Address
+                  </LoadingButton>
+                </Stack>
+              </Stack>
 
               {/* existing address */}
               <Stack rowGap={3}>
@@ -952,7 +805,6 @@ export const Checkout = () => {
           </Grid>
         </Grid>
       </Container>
-      <ToastContainer />
     </Box>
   );
 };
