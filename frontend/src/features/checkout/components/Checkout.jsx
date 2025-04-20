@@ -354,6 +354,28 @@ export const Checkout = () => {
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponError, setCouponError] = useState('');
 
+  const formValidation = {
+    type: { required: "Address type is required" },
+    street: { required: "Street address is required" },
+    phoneNumber: {
+      required: "Phone number is required",
+      pattern: {
+        value: /^\d{10}$/,
+        message: "Please enter a valid 10-digit phone number"
+      }
+    },
+    country: { required: "Country is required" },
+    city: { required: "City is required" },
+    state: { required: "State is required" },
+    postalCode: {
+      required: "Postal code is required",
+      pattern: {
+        value: /^\d{6}$/,
+        message: "Please enter a valid 6-digit postal code"
+      }
+    }
+  };
+
   const calculateDiscount = (coupon) => {
     if (!coupon || !orderTotal) return 0;
 
@@ -376,10 +398,11 @@ export const Checkout = () => {
   useEffect(() => {
     if (addressStatus === 'fulfilled') {
       reset();
+      toast.success('Address saved successfully!');
     } else if (addressStatus === 'rejected') {
-      alert('Error adding your address');
+      toast.error('Failed to save address');
     }
-  }, [addressStatus]);
+  }, [addressStatus, reset]);
 
   useEffect(() => {
     if (currentOrder && currentOrder?._id) {
@@ -388,9 +411,22 @@ export const Checkout = () => {
     }
   }, [currentOrder]);
 
-  const handleAddAddress = (data) => {
-    const address = { ...data, user: loggedInUser._id };
-    dispatch(addAddressAsync(address));
+  const handleAddAddress = async (data) => {
+    if (!loggedInUser?._id) {
+      toast.error('Please login to add address');
+      return;
+    }
+  
+    const addressData = {
+      ...data,
+      user: loggedInUser._id
+    };
+  
+    try {
+      await dispatch(addAddressAsync(addressData)).unwrap();
+    } catch (error) {
+      toast.error(error.message || 'Failed to save address');
+    }
   };
 
   const handleCreateOrder = async () => {
@@ -408,7 +444,7 @@ export const Checkout = () => {
 
       script.onload = () => {
         const options = {
-          key: "rzp_test_48B2W8nnEMHLog", // Replace with your test key
+          key: "rzp_live_kYGlb6Srm9dDRe", // Replace with your test key
           amount: (orderTotal + SHIPPING + TAXES) * 100, // Amount in paise
           currency: "INR",
           name: "Apex Store",
@@ -529,103 +565,81 @@ export const Checkout = () => {
                 </Stack>
 
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
-                    <StyledTextField
-                      icon={<HomeIcon />}
-                      label="Address Type"
-                      placeholder="Home, Office, etc."
-                      {...register("type", { 
-                        required: "Address type is required" 
-                      })}
-                      error={!!errors.type}
-                      helperText={errors.type?.message}
-                    />
-                  </Grid>
-                  
-                  <Grid item xs={12}>
-                    <StyledTextField
-                      icon={<LocationOnIcon />}
-                      label="Street Address"
-                      multiline
-                      rows={2}
-                      {...register("street", { 
-                        required: "Street address is required" 
-                      })}
-                      error={!!errors.street}
-                      helperText={errors.street?.message}
-                    />
-                  </Grid>
+  <Grid item xs={12} sm={6}>
+    <StyledTextField
+      icon={<HomeIcon />}
+      label="Address Type"
+      placeholder="Home, Office, etc."
+      {...register("type", formValidation.type)}
+      error={!!errors.type}
+      helperText={errors.type?.message}
+    />
+  </Grid>
+  
+  <Grid item xs={12}>
+    <StyledTextField
+      icon={<LocationOnIcon />}
+      label="Street Address"
+      multiline
+      rows={2}
+      {...register("street", formValidation.street)}
+      error={!!errors.street}
+      helperText={errors.street?.message}
+    />
+  </Grid>
 
-                  <Grid item xs={12} sm={6}>
-                    <StyledTextField
-                      icon={<PhoneIcon />}
-                      label="Phone Number"
-                      type="tel"
-                      {...register("phoneNumber", { 
-                        required: "Phone number is required",
-                        pattern: {
-                          value: /^\d{10}$/,
-                          message: "Please enter a valid 10-digit number"
-                        }
-                      })}
-                      error={!!errors.phoneNumber}
-                      helperText={errors.phoneNumber?.message}
-                    />
-                  </Grid>
+  <Grid item xs={12} sm={6}>
+    <StyledTextField
+      icon={<PhoneIcon />}
+      label="Phone Number"
+      type="tel"
+      {...register("phoneNumber", formValidation.phoneNumber)}
+      error={!!errors.phoneNumber}
+      helperText={errors.phoneNumber?.message}
+    />
+  </Grid>
 
-                  <Grid item xs={12} sm={6}>
-                    <StyledTextField
-                      icon={<PublicIcon />}
-                      label="Country"
-                      {...register("country", { 
-                        required: "Country is required" 
-                      })}
-                      error={!!errors.country}
-                      helperText={errors.country?.message}
-                    />
-                  </Grid>
+  <Grid item xs={12} sm={6}>
+    <StyledTextField
+      icon={<PublicIcon />}
+      label="Country"
+      {...register("country", formValidation.country)}
+      error={!!errors.country}
+      helperText={errors.country?.message}
+    />
+  </Grid>
 
-                  <Grid item xs={12} sm={4}>
-                    <StyledTextField
-                      icon={<LocationCityIcon />}
-                      label="City"
-                      {...register("city", { 
-                        required: "City is required" 
-                      })}
-                      error={!!errors.city}
-                      helperText={errors.city?.message}
-                    />
-                  </Grid>
+  <Grid item xs={12} sm={4}>
+    <StyledTextField
+      icon={<LocationCityIcon />}
+      label="City"
+      {...register("city", formValidation.city)}
+      error={!!errors.city}
+      helperText={errors.city?.message}
+    />
+  </Grid>
 
-                  <Grid item xs={12} sm={4}>
-                    <StyledTextField
-                      icon={<LocationCityIcon />}
-                      label="State"
-                      {...register("state", { 
-                        required: "State is required" 
-                      })}
-                      error={!!errors.state}
-                      helperText={errors.state?.message}
-                    />
-                  </Grid>
+  <Grid item xs={12} sm={4}>
+    <StyledTextField
+      icon={<LocationCityIcon />}
+      label="State"
+      {...register("state", formValidation.state)}
+      error={!!errors.state}
+      helperText={errors.state?.message}
+    />
+  </Grid>
 
-                  <Grid item xs={12} sm={4}>
-                    <StyledTextField
-                      icon={<LocationOnIcon />}
-                      label="Postal Code"
-                      type="number"
-                      {...register("postalCode", { 
-                        required: "Postal code is required",
-                        pattern: {
-                          value: /^\d{6}$/,
-                          message: "Please enter a valid 6-digit postal code"
-                        }
-                      })}
-                      error={!!errors.postalCode}
-                      helperText={errors.postalCode?.message}
-                    />
-                  </Grid>
-                </Grid>
+  <Grid item xs={12} sm={4}>
+    <StyledTextField
+      icon={<LocationOnIcon />}
+      label="Postal Code"
+      type="number"
+      {...register("postalCode", formValidation.postalCode)}
+      error={!!errors.postalCode}
+      helperText={errors.postalCode?.message}
+    />
+  </Grid>
+</Grid>
 
                 <Stack 
                   direction="row" 
