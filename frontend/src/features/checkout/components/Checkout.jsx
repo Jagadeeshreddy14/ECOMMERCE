@@ -683,7 +683,7 @@ export const Checkout = () => {
 
       script.onload = () => {
         const options = {
-          key: "rzp_live_kYGlb6Srm9dDRe", // Replace with your test key
+          key: "rzp_test_48B2W8nnEMHLog", // Replace with your test key
           amount: totalAmount * 100, // Amount in paise
           currency: "INR",
           name: "Apex Store",
