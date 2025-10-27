@@ -137,6 +137,7 @@ exports.verifyOtp=async(req,res)=>{
 
 exports.resendOtp=async(req,res)=>{
     try {
+        console.log('Resend OTP request body:', req.body);
 
         const existingUser=await User.findById(req.body.user)
 
@@ -152,12 +153,28 @@ exports.resendOtp=async(req,res)=>{
         const newOtp=new Otp({user:req.body.user,otp:hashedOtp,expiresAt:Date.now()+parseInt(process.env.OTP_EXPIRATION_TIME)})
         await newOtp.save()
 
-        await sendMail(existingUser.email,`OTP Verification for Your Apex Store Account`,`Your One-Time Password (OTP) for account verification is: <b>${otp}</b>.</br>Do not share this OTP with anyone for security reasons`)
+        // Wrap email sending in try-catch to not fail OTP resend
+        let emailSent = false;
+        try {
+            await sendMail(existingUser.email,`OTP Verification for Your Apex Store Account`,`Your One-Time Password (OTP) for account verification is: <b>${otp}</b>.</br>Do not share this OTP with anyone for security reasons`)
+            emailSent = true;
+            console.log('✅ OTP email sent successfully to:', existingUser.email);
+        } catch (emailError) {
+            console.error('❌ Email sending failed:', emailError);
+            // Log OTP to console for development/testing
+            console.log('='.repeat(50));
+            console.log('⚠️  EMAIL NOT CONFIGURED - OTP for testing:');
+            console.log('Email:', existingUser.email);
+            console.log('OTP CODE:', otp);
+            console.log('='.repeat(50));
+        }
 
+        console.log('✅ OTP generated and saved for user:', existingUser._id);
         res.status(201).json({'message':"OTP sent"})
     } catch (error) {
-        res.status(500).json({'message':"Some error occured while resending otp, please try again later"})
-        console.log(error);
+        console.error('Resend OTP error:', error);
+        console.error('Error stack:', error.stack);
+        res.status(500).json({'message':"Some error occured while resending otp, please try again later", 'error': error.message})
     }
 }
 

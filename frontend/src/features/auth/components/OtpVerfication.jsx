@@ -47,7 +47,7 @@ export const OtpVerfication = () => {
 
     useEffect(() => {
         if (resendOtpSuccessMessage) {
-            toast.success(resendOtpSuccessMessage.message)
+            toast.success(resendOtpSuccessMessage.message || 'OTP sent successfully!');
         }
         return () => {
             dispatch(clearResendOtpSuccessMessage())

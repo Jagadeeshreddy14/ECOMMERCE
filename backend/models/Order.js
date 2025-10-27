@@ -12,7 +12,7 @@ const orderSchema=new Schema({
         required:true
     },
     address:{
-        type:[Schema.Types.Mixed],
+        type:Schema.Types.Mixed,
         required:true
     },
     status:{
@@ -25,6 +25,13 @@ const orderSchema=new Schema({
         enum:['COD','UPI','CARD'],
         required:true
     },
+    paymentStatus:{
+        type:String,
+        enum:['Pending','Processing','Completed','Failed'],
+        default:'Pending'
+    },
+    paymentId: String,
+    discount: Number,
     total:{
         type:Number,
         required:true

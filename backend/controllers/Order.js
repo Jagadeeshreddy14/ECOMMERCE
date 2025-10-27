@@ -31,6 +31,8 @@ exports.createRazorpayOrder = async (req, res) => {
 // Create order in database
 exports.create = async (req, res) => {
   try {
+    console.log('Creating order with data:', JSON.stringify(req.body, null, 2));
+    
     const order = new Order({
       ...req.body,
       createdAt: new Date(),
@@ -38,6 +40,7 @@ exports.create = async (req, res) => {
     });
     
     const savedOrder = await order.save();
+    console.log('Order saved successfully:', savedOrder._id);
     
     // Populate necessary fields
     const populatedOrder = await Order.findById(savedOrder._id)
@@ -47,16 +50,23 @@ exports.create = async (req, res) => {
         populate: { path: 'brand' }
       });
 
-    // Send order confirmation email
-    await sendMail(
-      populatedOrder.user.email,
-      'Order Confirmation - Apex Store',
-      orderConfirmationEmail(populatedOrder, populatedOrder.user)
-    );
+    // Send order confirmation email (wrapped in try-catch to not fail order creation)
+    try {
+      await sendMail(
+        populatedOrder.user.email,
+        'Order Confirmation - Apex Store',
+        orderConfirmationEmail(populatedOrder, populatedOrder.user)
+      );
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError);
+      // Continue even if email fails
+    }
 
+    console.log('Order creation successful');
     res.status(201).json(populatedOrder);
   } catch (error) {
     console.error('Order creation error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       message: 'Error creating order',
       error: error.message
