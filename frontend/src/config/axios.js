@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const axiosi = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'https://apex-store-backend-y1tk.onrender.com',
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8000',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
@@ -11,10 +11,10 @@ export const axiosi = axios.create({
 // Add request interceptor to include auth token
 axiosi.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
     return config;
   },
   (error) => {

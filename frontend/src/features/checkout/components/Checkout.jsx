@@ -2,7 +2,7 @@ import { Stack, TextField, Typography, Button, Menu, MenuItem, Select, Grid, For
 import { LoadingButton } from '@mui/lab';
 import React, { useEffect, useState } from 'react';
 import { Cart } from '../../cart/components/Cart';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { addAddressAsync, selectAddressStatus, selectAddresses } from '../../address/AddressSlice';
 import { selectLoggedInUser } from '../../auth/AuthSlice';
@@ -338,7 +338,7 @@ export const Checkout = () => {
   const addresses = useSelector(selectAddresses);
   const [selectedAddress, setSelectedAddress] = useState(addresses[0]);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cash');
-  const { register, handleSubmit, watch, reset, formState: { errors } } = useForm();
+  const { register, handleSubmit, watch, reset, control, formState: { errors } } = useForm();
   const dispatch = useDispatch();
   const loggedInUser = useSelector(selectLoggedInUser);
   const addressStatus = useSelector(selectAddressStatus);
@@ -416,16 +416,19 @@ export const Checkout = () => {
       toast.error('Please login to add address');
       return;
     }
-  
+
     const addressData = {
       ...data,
       user: loggedInUser._id
     };
-  
+
     try {
-      await dispatch(addAddressAsync(addressData)).unwrap();
+      const savedAddress = await dispatch(addAddressAsync(addressData)).unwrap();
+      setSelectedAddress(savedAddress);
+      reset();
+      toast.success('Address saved successfully');
     } catch (error) {
-      toast.error(error.message || 'Failed to save address');
+      toast.error(error?.message || 'Failed to save address');
     }
   };
 
@@ -566,77 +569,133 @@ export const Checkout = () => {
 
                 <Grid container spacing={2}>
   <Grid item xs={12} sm={6}>
-    <StyledTextField
-      icon={<HomeIcon />}
-      label="Address Type"
-      placeholder="Home, Office, etc."
-      {...register("type", formValidation.type)}
-      error={!!errors.type}
-      helperText={errors.type?.message}
+    <Controller
+      name="type"
+      control={control}
+      rules={formValidation.type}
+      defaultValue=""
+      render={({ field }) => (
+        <StyledTextField
+          {...field}
+          icon={<HomeIcon />}
+          label="Address Type"
+          placeholder="Home, Office, etc."
+          error={!!errors.type}
+          helperText={errors.type?.message}
+        />
+      )}
     />
   </Grid>
   
   <Grid item xs={12}>
-    <StyledTextField
-      icon={<LocationOnIcon />}
-      label="Street Address"
-      multiline
-      rows={2}
-      {...register("street", formValidation.street)}
-      error={!!errors.street}
-      helperText={errors.street?.message}
+    <Controller
+      name="street"
+      control={control}
+      rules={formValidation.street}
+      defaultValue=""
+      render={({ field }) => (
+        <StyledTextField
+          {...field}
+          icon={<LocationOnIcon />}
+          label="Street Address"
+          multiline
+          rows={2}
+          error={!!errors.street}
+          helperText={errors.street?.message}
+        />
+      )}
     />
   </Grid>
 
   <Grid item xs={12} sm={6}>
-    <StyledTextField
-      icon={<PhoneIcon />}
-      label="Phone Number"
-      type="tel"
-      {...register("phoneNumber", formValidation.phoneNumber)}
-      error={!!errors.phoneNumber}
-      helperText={errors.phoneNumber?.message}
+    <Controller
+      name="phoneNumber"
+      control={control}
+      rules={formValidation.phoneNumber}
+      defaultValue=""
+      render={({ field }) => (
+        <StyledTextField
+          {...field}
+          icon={<PhoneIcon />}
+          label="Phone Number"
+          type="tel"
+          error={!!errors.phoneNumber}
+          helperText={errors.phoneNumber?.message}
+        />
+      )}
     />
   </Grid>
 
   <Grid item xs={12} sm={6}>
-    <StyledTextField
-      icon={<PublicIcon />}
-      label="Country"
-      {...register("country", formValidation.country)}
-      error={!!errors.country}
-      helperText={errors.country?.message}
+    <Controller
+      name="country"
+      control={control}
+      rules={formValidation.country}
+      defaultValue=""
+      render={({ field }) => (
+        <StyledTextField
+          {...field}
+          icon={<PublicIcon />}
+          label="Country"
+          error={!!errors.country}
+          helperText={errors.country?.message}
+        />
+      )}
     />
   </Grid>
 
   <Grid item xs={12} sm={4}>
-    <StyledTextField
-      icon={<LocationCityIcon />}
-      label="City"
-      {...register("city", formValidation.city)}
-      error={!!errors.city}
-      helperText={errors.city?.message}
+    <Controller
+      name="city"
+      control={control}
+      rules={formValidation.city}
+      defaultValue=""
+      render={({ field }) => (
+        <StyledTextField
+          {...field}
+          icon={<LocationCityIcon />}
+          label="City"
+          error={!!errors.city}
+          helperText={errors.city?.message}
+        />
+      )}
     />
   </Grid>
 
   <Grid item xs={12} sm={4}>
-    <StyledTextField
-      icon={<LocationCityIcon />}
-      label="State"
-      {...register("state", formValidation.state)}
-      error={!!errors.state}
-      helperText={errors.state?.message}
+    <Controller
+      name="state"
+      control={control}
+      rules={formValidation.state}
+      defaultValue=""
+      render={({ field }) => (
+        <StyledTextField
+          {...field}
+          icon={<LocationCityIcon />}
+          label="State"
+          error={!!errors.state}
+          helperText={errors.state?.message}
+        />
+      )}
     />
   </Grid>
 
   <Grid item xs={12} sm={4}>
-    <StyledTextField
-      icon={<LocationOnIcon />}
-      label="Postal Code"
-      type="number"
-      {...register("postalCode", formValidation.postalCode)}
-      error={!!errors.postalCode}
-      helperText={errors.postalCode?.message}
+    <Controller
+      name="postalCode"
+      control={control}
+      rules={formValidation.postalCode}
+      defaultValue=""
+      render={({ field }) => (
+        <StyledTextField
+          {...field}
+          icon={<LocationOnIcon />}
+          label="Postal Code"
+          type="text"
+          error={!!errors.postalCode}
+          helperText={errors.postalCode?.message}
+        />
+      )}
     />
   </Grid>
 </Grid>
