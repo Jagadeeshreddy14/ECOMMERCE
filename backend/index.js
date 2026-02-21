@@ -34,7 +34,7 @@ const allowedOrigins = [
 
 // middlewares
 server.use(cors({
-  origin: ['https://apex-store-eyym.onrender.com', 'http://localhost:3000'], // Add your frontend origin
+  origin: ['https://apex-store-eyym.onrender.com'], // Add your frontend origin
   credentials: true,
 }));
 server.use(cors({
